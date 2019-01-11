@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<atlassian-plugin key="${atlassian.plugin.key}" name="${project.name}" plugins-version="2">
+  <plugin-info>
+    <description>${project.description}</description>
+    <version>${project.version}</version>
+    <vendor name="${project.organization.name}" url="${project.organization.url}"/>
+    <param name="plugin-icon">images/pluginIcon.png</param>
+    <param name="plugin-logo">images/pluginLogo.png</param>
+  </plugin-info>
+  <!-- add our i18n resource -->
+  <resource type="i18n" name="i18n" location="jira-customize"/>
+  <!-- add our web resources -->
+  <web-resource key="jira-customize-resources" name="jira-customize Web Resources">
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <dependency>com.atlassian.auiplugin:aui-buttons</dependency>
+    <dependency>com.atlassian.auiplugin:aui-experimental-progress-indicator</dependency>
+    <resource type="download" name="jira-customize.css" location="/css/jira-customize.css"/>
+    <resource type="download" name="jira-customize.js" location="/js/jira-customize.js"/>
+    <resource type="download" name="moment.min.js" location="/js/moment.min.js"/>
+    <resource type="download" name="images/" location="/images"/>
+    <context>jira-customize</context>
+  </web-resource>
+  <ao key="ao-module">
+    <entity>com.cmcglobal.plugins.entity.TestCase</entity>
+    <entity>com.cmcglobal.plugins.entity.TestResult</entity>
+    <entity>com.cmcglobal.plugins.entity.TestingPhase</entity>
+    <entity>com.cmcglobal.plugins.entity.TestCaseType</entity>
+    <entity>com.cmcglobal.plugins.entity.TeamsMembers</entity>
+    <entity>com.cmcglobal.plugins.entity.UploadFile</entity>
+    <entity>com.cmcglobal.plugins.entity.HuDevice</entity>
+    <entity>com.cmcglobal.plugins.entity.ScreenDevice</entity>
+    <entity>com.cmcglobal.plugins.entity.SiAmigoInfo</entity>
+    <entity>com.cmcglobal.plugins.entity.SiSysInfo</entity>
+    <entity>com.cmcglobal.plugins.entity.HuTypeVehicle</entity>
+    <entity>com.cmcglobal.plugins.entity.SetOfDevice</entity>
+    <entity>com.cmcglobal.plugins.entity.TestHuMarket</entity>
+    <entity>com.cmcglobal.plugins.entity.VehicleParameter</entity>
+    <entity>com.cmcglobal.plugins.entity.ExternalDeviceType</entity>
+    <entity>com.cmcglobal.plugins.entity.Model</entity>
+    <entity>com.cmcglobal.plugins.entity.CSVTestResult</entity>
+    <entity>com.cmcglobal.plugins.entity.TestResultHistory</entity>
+  </ao>
+  <!--<issue-tabpanel key="test-case" name="Test Case" i18n-name-key="test-case.name"
+                            class="com.cmcglobal.plugins.jira.tabpanels.TestCaseController">
+                <description key="test-case.description">The Test Case Plugin</description>
+                <label key="test-case.label"/>
+                <order>10</order>
+                <resource type="download" name="jira-customize.css" location="/css/jira-customize.css"/>
+                <resource type="velocity" name="view" location="templates/tabpanels/test-case.vm"/>
+                <supports-ajax-load>true</supports-ajax-load>
+            </issue-tabpanel>
+            <issue-tabpanel key="test-result" name="Test Result" i18n-name-key="test-result.name"
+                            class="com.cmcglobal.plugins.jira.tabpanels.TestResultController">
+                <description key="test-result.description">The Test Result Plugin</description>
+                <label key="test-result.label"/>
+                <supports-ajax-load>true</supports-ajax-load>
+                <order>10</order>
+                <resource type="velocity" name="view" location="templates/tabpanels/test-result.vm"/>
+            </issue-tabpanel>-->
+  <!--    <web-item name="Plan" i18n-name-key="plan.name" key="PlanTest" section="transitions-all" weight="1000">
+                    <description key="plan.description">Plan Test</description>
+                    <context-provider class="com.cmcglobal.plugins.web.contextproviders.PlanTestProvider"/>
+                    <icon width="16" height="16">
+                        <link linkId="PlanTest-icon">/images/icons/print.gif</link>
+                    </icon>
+                    <label key="plan.label">
+                        <param name="param0" value="phaseName"/>
+                    </label>
+                    <link linkId="plan-link">/secure/PlanTest!default.jspa?decorator=none</link>
+                    <resource name="edit-plan" type="download" location="templates/webitem/plan-test.vm"/>
+                </web-item>
+                <web-item name="NOT OK" i18n-name-key="notoktestcase.name" key="notoktestcase" section="transitions-all"
+                          weight="1000">
+                    <description key="notoktestcase.description">NOT OK</description>
+                    <context-provider class="com.cmcglobal.plugins.web.contextproviders.NotOKTestCaseProvider"/>
+                    <icon width="16" height="16">
+                        <link linkId="notoktestcase-icon">/images/icons/print.gif</link>
+                    </icon>
+                    <label key="notoktestcase.label">
+                        <param name="param0" value="phaseName"/>
+                    </label>
+                    <link linkId="notoktestcase-link">/secure/notoktestcase!default.jspa?decorator=none</link>
+                    <resource name="edit-notoktestcase" type="download" location="templates/webitem/notoktestcase.vm"/>
+                </web-item>
+                <web-item name="OK" i18n-name-key="oktestcase.name" key="oktestcase" section="transitions-all" weight="1000">
+                    <description key="oktestcase.description">OK</description>
+                    <context-provider class="com.cmcglobal.plugins.web.contextproviders.NotOKTestCaseProvider"/>
+                    <icon width="16" height="16">
+                        <link linkId="oktestcase-icon">/images/icons/print.gif</link>
+                    </icon>
+                    <label key="oktestcase.label">
+                        <param name="param0" value="phaseName"/>
+                    </label>
+                    <link linkId="oktestcase-link">/secure/oktestcase!default.jspa?decorator=none</link>
+                    <resource name="edit-oktestcase" type="download" location="templates/webitem/oktestcase.vm"/>
+                </web-item>-->
+  <!--Begin import file-->
+  <web-item key="import-device" name="Import Device" section="jira.project.sidebar.plugins.navigation" weight="300">
+    <description key="import-device-desc">Import Device</description>
+    <label key="import-device.label"/>
+    <link linkId="admin_import_device_link">/projects/$pathEncodedProjectKey?selectedItem=${project.groupId}.${project.artifactId}:import-device</link>
+    <conditions type="AND">
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectDeviceCondition"/>
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectRoleIsPMOrQCLeader"/>
+    </conditions>
+    <param name="iconClass" value="aui-icon aui-icon-large aui-iconfont-file-xls"/>
+  </web-item>
+  <web-panel name="Import Device" i18n-name-key="import-device.name" key="import-device-panel" location="${project.groupId}.${project.artifactId}:import-device" weight="1000">
+    <conditions type="AND">
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectDeviceCondition"/>
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectRoleIsPMOrQCLeader"/>
+    </conditions>
+    <resource name="view" type="velocity" location="templates/devices/import-devices.vm"/>
+    <context-provider class="com.cmcglobal.plugins.jira.imports.ImportDeviceProvider"/>
+  </web-panel>
+  <servlet name="Upload File Deive Servlet" i18n-name-key="import-device-servlet.name" key="upload-file-device-servlet" class="com.cmcglobal.plugins.servlet.UploadDeviceServlet">
+    <description key="import-device-servlet.description">The Upload File Servlet Plugin</description>
+    <url-pattern>/uploadfiledeviceservlet</url-pattern>
+  </servlet>
+  <web-item key="import-test-case" name="Import Test Case" section="jira.project.sidebar.plugins.navigation" weight="300">
+    <description key="import-test-case-desc">Import Test Case</description>
+    <label key="import-test-case.label"/>
+    <link linkId="admin_import_test_case_link">/projects/$pathEncodedProjectKey?selectedItem=${project.groupId}.${project.artifactId}:import-test-case</link>
+    <param name="iconClass" value="aui-icon aui-icon-large aui-iconfont-file-xls"/>
+    <conditions type="AND">
+      <condition class="com.cmcglobal.plugins.jira.conditions.IsProjectTest"/>
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectRoleIsPMOrQCLeader"/>
+    </conditions>
+  </web-item>
+  <web-panel name="Import File" i18n-name-key="import-file.name" key="import-file" location="${project.groupId}.${project.artifactId}:import-test-case" weight="1000">
+    <conditions type="AND">
+      <condition class="com.cmcglobal.plugins.jira.conditions.IsProjectTest"/>
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectRoleIsPMOrQCLeader"/>
+    </conditions>
+    <resource name="view" type="velocity" location="templates/tabpanels/import-file.vm"/>
+    <context-provider class="com.cmcglobal.plugins.jira.imports.ImportProvider"/>
+  </web-panel>
+  <!--End import file-->
+  <search-request-view name="Export Excel TC" i18n-name-key="export-excel-tc.name" key="export-excel-tc" class="com.cmcglobal.plugins.jira.export.ExportExcelTC" fileExtension="xlsx" contentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet">
+    <description key="export-excel-tc.description">The Export Excel TC Plugin</description>
+    <resource name="header" type="velocity" location="/templates/search/export-excel-tc/header.vm"/>
+    <resource name="singleissue" type="velocity" location="/templates/search/export-excel-tc/singleissue.vm"/>
+    <resource name="footer" type="velocity" location="/templates/search/export-excel-tc/footer.vm"/>
+    <order>10</order>
+  </search-request-view>
+  <!-- Begin Testing phase -->
+  <web-item key="testing-phase-nav-item" name="Testing phase navigator" section="atl.jira.proj.config/projectgroup3" weight="25">
+    <label key="testing-phase-nav-item.label"/>
+    <link linkId="testing-phase-nav-item-link">/secure/TestingPhasesAction!default.jspa?pid=${helper.projectObject.id}&amp;projectKey=$projectKeyEncoded</link>
+    <condition class="com.cmcglobal.plugins.jira.conditions.IsProjectTest"/>
+  </web-item>
+  <webwork1 key="testing-phases" name="Testing Phases" i18n-name-key="testing-phases.name">
+    <description key="testing-phases.description">The Testing Phases Plugin</description>
+    <actions>
+      <action name="com.cmcglobal.plugins.jira.webwork.TestingPhasesAction" alias="TestingPhasesAction">
+        <view name="testing-phases">/templates/testing-phases/testing-phases.vm</view>
+      </action>
+    </actions>
+  </webwork1>
+  <!--End Testing phase-->
+  <!-- Begin Test case type -->
+  <web-item key="testcase-type-nav-item" name="Testcase type navigator" section="atl.jira.proj.config/projectgroup3" weight="25">
+    <label key="testcase-type-nav-item.label"/>
+    <link linkId="testcase-type-nav-item-link">/secure/TestCaseTypesAction!default.jspa?pid=${helper.projectObject.id}&amp;projectKey=$projectKeyEncoded</link>
+    <condition class="com.cmcglobal.plugins.jira.conditions.IsProjectTest"/>
+  </web-item>
+  <webwork1 key="testcase-types" name="Testcase Types" i18n-name-key="testcase-types.name">
+    <description key="testcase-types.description">The Testcase Types Plugin</description>
+    <actions>
+      <action name="com.cmcglobal.plugins.jira.webwork.TestCaseTypesAction" alias="TestCaseTypesAction">
+        <view name="testcase-types">/templates/testcase-types/testcase-types.vm</view>
+      </action>
+    </actions>
+  </webwork1>
+  <!--End case type-->
+  <servlet name="Import Test Case Servlet" i18n-name-key="import-test-case-servlet.name" key="import-test-case-servlet" class="com.cmcglobal.plugins.servlet.ImportTestCaseServlet">
+    <description key="import-test-case-servlet.description">The Import Test Case Servlet Plugin</description>
+    <url-pattern>/importtestcaseservlet</url-pattern>
+  </servlet>
+  <servlet name="Upload File Servlet" i18n-name-key="import-test-case-servlet.name" key="upload-file-servlet" class="com.cmcglobal.plugins.servlet.UploadFileServlet">
+    <description key="import-test-case-servlet.description">The Upload File Servlet Plugin</description>
+    <url-pattern>/uploadfileservlet</url-pattern>
+  </servlet>
+  <web-resource key="test-project-template-resources" name="test-project-template Web Resources">
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <transformation extension="soy">
+      <transformer key="soyTransformer"/>
+    </transformation>
+    <transformation extension="js">
+      <transformer key="jsI18n"/>
+    </transformation>
+    <resource type="download" name="TestProjectTemplate.soy.js" location="/soy/TestProjectTemplate.soy"/>
+    <resource type="download" name="images/" location="/images">
+      <param name="content-type" value="image/png; charset=binary"/>
+    </resource>
+    <context>atl.general</context>
+    <context>atl.admin</context>
+  </web-resource>
+  <project-blueprint key="test-project-template" weight="90">
+    <label key="test.project.template.name"/>
+    <projectTypeKey>business</projectTypeKey>
+    <description key="test.project.template.description"/>
+    <longDescription key="test.project.template.description.long"/>
+    <infoPage soy-template="JIRA.Templates.ProjectTemplates.JiraCustomize.renderTestProjectTemplateExplanation"/>
+    <icon location="images/test-template-icon.png"/>
+    <backgroundIcon location="images/test-template-background.png"/>
+    <add-project>
+      <hook class="com.cmcglobal.plugins.hook.AddTestProjectHook"/>
+      <descriptor file="/config/test-project-template-config.json"/>
+    </add-project>
+  </project-blueprint>
+  <web-resource key="qna-project-template-resources" name="QnA Project Web Resources">
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <transformation extension="soy">
+      <transformer key="soyTransformer"/>
+    </transformation>
+    <transformation extension="js">
+      <transformer key="jsI18n"/>
+    </transformation>
+    <resource type="download" name="QnAProjectTemplate.soy.js" location="/soy/QnAProjectTemplate.soy"/>
+    <resource type="download" name="images/" location="/images">
+      <param name="content-type" value="image/png; charset=binary"/>
+    </resource>
+    <context>atl.general</context>
+    <context>atl.admin</context>
+  </web-resource>
+  <project-blueprint key="qna-project-template" weight="80">
+    <label key="qna.project.template.name"/>
+    <projectTypeKey>business</projectTypeKey>
+    <description key="qna.project.template.description"/>
+    <longDescription key="qna.project.template.description.long"/>
+    <infoPage soy-template="JIRA.Templates.ProjectTemplates.JiraCustomize.renderQnAProjectTemplateExplanation"/>
+    <icon location="images/test-template-icon.png"/>
+    <backgroundIcon location="images/test-template-background.png"/>
+    <add-project>
+      <hook class="com.cmcglobal.plugins.hook.AddQnAProjectHook"/>
+      <descriptor file="/config/qna-project-template-config.json"/>
+    </add-project>
+  </project-blueprint>
+  <workflow-validator key="field-validator" name="Field Validator" class="com.cmcglobal.plugins.jira.validators.FieldValidatorFactory">
+    <description>Field Not Empty Workflow Validator</description>
+    <validator-class>com.cmcglobal.plugins.jira.validators.FieldValidator</validator-class>
+    <resource type="velocity" name="view" location="/templates/validators/field-value-validator-view.vm"/>
+    <resource type="velocity" name="input-parameters" location="/templates/validators/field-value-validator-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="/templates/validators/field-value-validator-input.vm"/>
+  </workflow-validator>
+  <web-resource key="environment-project-template-resources" name="Environment Project Web Resources">
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <transformation extension="soy">
+      <transformer key="soyTransformer"/>
+    </transformation>
+    <transformation extension="js">
+      <transformer key="jsI18n"/>
+    </transformation>
+    <resource type="download" name="EnvironmentProjectTemplate.soy.js" location="/soy/EnvironmentProjectTemplate.soy"/>
+    <resource type="download" name="images/" location="/images">
+      <param name="content-type" value="image/png; charset=binary"/>
+    </resource>
+    <context>atl.general</context>
+    <context>atl.admin</context>
+  </web-resource>
+  <project-blueprint key="environment-project-template" weight="100">
+    <label key="environment.project.template.name"/>
+    <projectTypeKey>business</projectTypeKey>
+    <description key="environment.project.template.description"/>
+    <longDescription key="environment.project.template.description.long"/>
+    <infoPage soy-template="JIRA.Templates.ProjectTemplates.JiraCustomize.renderEnvironmentProjectTemplateExplanation"/>
+    <icon location="images/test-template-icon.png"/>
+    <backgroundIcon location="images/test-template-background.png"/>
+    <add-project>
+      <hook class="com.cmcglobal.plugins.hook.AddEnvironmentProjectHook"/>
+      <descriptor file="/config/environment-project-template-config.json"/>
+    </add-project>
+  </project-blueprint>
+  <workflow-validator key="test-case-plan-validator" name="Test Case Plan Validator" i18n-name-key="test-case-plan-validator.name" class="com.cmcglobal.plugins.jira.workflow.TestCasePlanValidatorFactory">
+    <description key="test-case-plan-validator.description">The Test Case Plan Validator Plugin</description>
+    <validator-class>com.cmcglobal.plugins.jira.workflow.TestCasePlanValidator</validator-class>
+    <resource type="velocity" name="view" location="templates/validators/test-case-plan-validator.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/validators/test-case-plan-validator-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/validators/test-case-plan-validator-input.vm"/>
+  </workflow-validator>
+  <workflow-function key="testcase-post-function" name="Testcase Post Function" i18n-name-key="testcase-post-function.name" class="com.cmcglobal.plugins.jira.postfunctions.TestcasePostFunctionFactory">
+    <description key="testcase-post-function.description">The Testcase Post Function Plugin</description>
+    <function-class>com.cmcglobal.plugins.jira.postfunctions.TestcasePostFunction</function-class>
+    <resource type="velocity" name="view" location="templates/postfunctions/testcase-post-function.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/postfunctions/testcase-post-function-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/postfunctions/testcase-post-function-input.vm"/>
+  </workflow-function>
+  <!-- Begin Teams management -->
+  <web-item key="teams-page" name="Teams management navigator" section="jira.project.sidebar.plugins.navigation" weight="20">
+    <label key="teams-management-nav-item.label"/>
+    <link>/projects/$pathEncodedProjectKey?selectedItem=${project.groupId}.${project.artifactId}:teams-page</link>
+    <param name="iconClass" value="aui-icon aui-icon-large aui-iconfont-group"/>
+    <condition class="com.cmcglobal.plugins.jira.conditions.IsProjectTest"/>
+    <condition class="com.cmcglobal.plugins.jira.conditions.ProjectPmCondition"/>
+  </web-item>
+  <web-panel name="Teams Management" i18n-name-key="teams-management.name" key="teams-management-panel" location="${project.groupId}.${project.artifactId}:teams-page" weight="1000">
+    <condition class="com.cmcglobal.plugins.jira.conditions.IsProjectTest"/>
+    <condition class="com.cmcglobal.plugins.jira.conditions.ProjectPmCondition"/>
+    <context-provider class="com.cmcglobal.plugins.jira.webpanel.TeamsContextProvider"/>
+    <resource name="view" type="velocity" location="templates/teams/teams.vm"/>
+  </web-panel>
+  <webwork1 key="teams-management-webwork1" name="Teams Management" i18n-name-key="teams-management.name">
+    <description key="teams-management.description">The Teams Management Plugin</description>
+    <actions>
+      <action name="com.cmcglobal.plugins.jira.webwork.TeamsManagementAction" alias="TeamsManagementAction">
+        <view name="success">/templates/teams-management/success.vm</view>
+        <view name="input">/templates/teams-management/input.vm</view>
+        <view name="error">/templates/teams-management/error.vm</view>
+      </action>
+    </actions>
+  </webwork1>
+  <!-- End Teams management -->
+  <report name="Tester Performance" i18n-name-key="tester-performance.name" key="tester-performance" class="com.cmcglobal.plugins.jira.reports.TesterPerformance">
+    <description key="tester-performance.description">The Tester Performance Plugin</description>
+    <resource name="view" type="velocity" location="/templates/reports/tester-performance/view.vm"/>
+    <resource name="error" type="velocity" location="/templates/reports/tester-performance/error.vm"/>
+    <resource name="i18n" type="i18n" location="TesterPerformance"/>
+    <label key="tester-performance.label"/>
+  </report>
+  <report name="Report result" i18n-name-key="report-result.name" key="report-result" class="com.cmcglobal.plugins.jira.reports.ReportResult">
+    <description key="report-result.description">The Daily Report Result</description>
+    <resource name="view" type="velocity" location="/templates/reports/tester-performance/viewResult.vm"/>
+    <resource name="error" type="velocity" location="/templates/reports/tester-performance/error.vm"/>
+    <resource name="i18n" type="i18n" location="TesterPerformance"/>
+    <resource type="velocity" name="excel" location="/templates/reports/tester-performance/report-excel.vm"/>
+    <label key="report-result.label"/>
+  </report>
+  <!-- the properties of this report which the user must select before running it -->
+  <!-- Uncomment and edit properties...-->
+  <!--Begin import file-->
+  <!--End import file-->
+  <servlet name="Import Device Servlet" i18n-name-key="import-device-servlet.name" key="import-device-servlet" class="com.cmcglobal.plugins.servlet.ImportDeviceServlet">
+    <description key="import-device-servlet.description">The Import Device Servlet Plugin</description>
+    <url-pattern>/importdeviceservlet</url-pattern>
+  </servlet>
+  <!-- Begin Teams management -->
+  <!-- End Teams management -->
+  <!-- the properties of this report which the user must select before running it -->
+  <!-- Uncomment and edit properties...
+        <properties>
+            <property>
+                <key>versionId</key>
+                <name>common.concepts.version</name>
+                <description>report.timetracking.version.description</description>
+                <type>select</type>
+                <values class="com.atlassian.jira.portal.VersionOptionalValuesGenerator"/>
+            </property>
+            <property>
+                <key>sortingOrder</key>
+                <name>report.timetracking.sortingorder</name>
+                <description>report.timetracking.sortingorder.description</description>
+                <type>select</type>
+                <values class="com.atlassian.jira.portal.SortingValuesGenerator"/>
+            </property>
+        </properties>
+        -->
+  <workflow-validator key="environment-validator" name="Environment Validator" class="com.cmcglobal.plugins.jira.validators.FieldValidatorEnviromentProjectFactory">
+    <description>Field Not Empty Workflow Validator</description>
+    <validator-class>com.cmcglobal.plugins.jira.validators.FieldValidatorEnviromentProject</validator-class>
+    <resource type="velocity" name="view" location="/templates/validators/field-validator-enviroment-project.vm"/>
+    <resource type="velocity" name="input-parameters" location="/templates/validators/field-validator-enviroment-project-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="/templates/validators/field-validator-enviroment-project-input.vm"/>
+  </workflow-validator>
+  <workflow-function key="environment-post-function" name="Environment Post Function" i18n-name-key="environment-post-function.name" class="com.cmcglobal.plugins.jira.postfunctions.EnvironmentPostFunctionFactory">
+    <description key="environment-post-function.description">The Environment Post Function Plugin</description>
+    <function-class>com.cmcglobal.plugins.jira.postfunctions.EnvironmentPostFunction</function-class>
+    <resource type="velocity" name="view" location="templates/postfunctions/environment-post-function.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/postfunctions/environment-post-function-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/postfunctions/environment-post-function-input.vm"/>
+  </workflow-function>
+  <web-item name="Test Hu Market" i18n-name-key="testHuMarket.name" key="testHuMarket" section="atl.jira.proj.config/projectgroup3" weight="45">
+    <description key="testHuMarket.description">Test Hu Market Description</description>
+    <label key="testHuMarket.label"/>
+    <link linkId="testHuMarket-link">/secure/TestHuMarketAction!default.jspa?pid=${helper.projectObject.id}&amp;projectKey=$projectKeyEncoded</link>
+    <condition class="com.cmcglobal.plugins.jira.conditions.ProjectEnvironmentCondition"/>
+  </web-item>
+  <webwork1 key="test-hu-market" name="Test Hu Market" i18n-name-key="testHuMarket.name">
+    <description key="testHuMarket.description">Test Hu Market description</description>
+    <actions>
+      <action name="com.cmcglobal.plugins.jira.webwork.TestHuMarketAction" alias="TestHuMarketAction">
+        <view name="success">/templates/test-hu-market/success.vm</view>
+      </action>
+    </actions>
+  </webwork1>
+  <web-item key="vehicle-parameter-nav-item" name="Vehicle Parameter navigator" section="atl.jira.proj.config/projectgroup3" weight="40">
+    <label key="vehicle-parameter.label"/>
+    <link linkId="vehicle-parameter-link">/secure/VehicleParameterAction!default.jspa?pid=${helper.projectObject.id}&amp;projectKey=$projectKeyEncoded</link>
+    <condition class="com.cmcglobal.plugins.jira.conditions.ProjectEnvironmentCondition"/>
+  </web-item>
+  <webwork1 key="vehicle-parameter" name="Vehicle Parameter" i18n-name-key="vehicleparameter.name">
+    <description key="vehicleParameter.description">Vehicle Parameter Description</description>
+    <actions>
+      <action name="com.cmcglobal.plugins.jira.webwork.VehicleParameterAction" alias="VehicleParameterAction">
+        <view name="vehicle-parameter">/templates/vehicle-parameter/vehicle-parameter.vm</view>
+      </action>
+    </actions>
+  </webwork1>
+  <servlet name="Tester Performance Servlet" i18n-name-key="tester-performance-servlet.name" key="tester-performance-servlet" class="com.cmcglobal.plugins.jira.reports.TesterPerformanceServlet">
+    <description key="tester-performance-servlet.description">The Tester Performance Servlet Plugin</description>
+    <url-pattern>/testerperformance</url-pattern>
+  </servlet>
+
+  <servlet name="Report Result Servlet" i18n-name-key="report-result.name" key="report-result-servlet" class="com.cmcglobal.plugins.jira.reports.ReportResultServlet">
+    <description key="tester-performance-servlet.description">The Report Result Servlet Plugin</description>
+    <url-pattern>/reportresult</url-pattern>
+  </servlet>
+
+  <!--Devices Project-->
+  <web-resource key="devices-project-template-resources" name="Devices Project Web Resources">
+    <dependency>com.atlassian.auiplugin:ajs</dependency>
+    <transformation extension="soy">
+      <transformer key="soyTransformer"/>
+    </transformation>
+    <transformation extension="js">
+      <transformer key="jsI18n"/>
+    </transformation>
+    <resource type="download" name="DevicesProjectTemplate.soy.js" location="/soy/DevicesProjectTemplate.soy"/>
+    <resource type="download" name="images/" location="/images">
+      <param name="content-type" value="image/png; charset=binary"/>
+    </resource>
+    <context>atl.general</context>
+    <context>atl.admin</context>
+  </web-resource>
+  <project-blueprint key="devices-project-template" weight="105">
+    <label key="devices.project.template.name"/>
+    <projectTypeKey>business</projectTypeKey>
+    <description key="devices.project.template.description"/>
+    <longDescription key="devices.project.template.description.long"/>
+    <infoPage soy-template="JIRA.Templates.ProjectTemplates.JiraCustomize.renderDevicesProjectTemplateExplanation"/>
+    <icon location="images/test-template-icon.png"/>
+    <backgroundIcon location="images/test-template-background.png"/>
+    <add-project>
+      <hook class="com.cmcglobal.plugins.hook.AddDevicesProjectHook"/>
+      <descriptor file="/config/devices-project-template-config.json"/>
+    </add-project>
+  </project-blueprint>
+  <!-- device team-->
+  <web-item name="Device team management" i18n-name-key="deviceteammanagement.name" key="deviceteammanagement" section="jira.project.sidebar.plugins.navigation" weight="20">
+    <description key="deviceteammanagement.description">The Device team management Plugin</description>
+    <label key="deviceteammanagement.label"/>
+    <param name="iconClass" value="aui-icon aui-icon-large aui-iconfont-group"/>
+    <link linkId="deviceteammanagement-link">/projects/$pathEncodedProjectKey?selectedItem=${project.groupId}.${project.artifactId}:device-teams-page</link>
+    <conditions type="AND">
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectDeviceCondition"/>
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectPmCondition"/>
+    </conditions>
+  </web-item>
+  <web-panel name="Device Teams Management" i18n-name-key="device-teams-management.name" key="device-teams-management" location="${project.groupId}.${project.artifactId}:device-teams-page" weight="1000">
+    <description key="device-teams-management.description">The Device Teams Management Plugin</description>
+    <context-provider class="com.cmcglobal.plugins.jira.webpanel.DeviceTeamsContextProvider"/>
+    <resource name="view" type="velocity" location="templates/teams/device-teams.vm"/>
+    <conditions type="AND">
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectDeviceCondition"/>
+      <condition class="com.cmcglobal.plugins.jira.conditions.ProjectPmCondition"/>
+    </conditions>
+  </web-panel>
+  <!-- end divice team-->
+  <workflow-condition key="plan-testcase-condition" name="Plan Testcase Condition" i18n-name-key="plan-testcase-condition.name" class="com.cmcglobal.plugins.jira.conditions.PlanTestcaseConditionFactory">
+    <description key="plan-testcase-condition.description">The Plan Testcase Condition Plugin</description>
+    <condition-class>com.cmcglobal.plugins.jira.conditions.PlanTestcaseCondition</condition-class>
+    <resource type="velocity" name="view" location="templates/conditions/plan-testcase-condition.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/conditions/plan-testcase-condition-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/conditions/plan-testcase-condition-input.vm"/>
+  </workflow-condition>
+  <workflow-condition key="test-result-condition" name="Test Result Condition" i18n-name-key="test-result-condition.name" class="com.cmcglobal.plugins.jira.conditions.TestResultConditionFactory">
+    <description key="test-result-condition.description">The Test Result Condition Plugin</description>
+    <condition-class>com.cmcglobal.plugins.jira.conditions.TestResultCondition</condition-class>
+    <resource type="velocity" name="view" location="templates/conditions/test-result-condition.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/conditions/test-result-condition-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/conditions/test-result-condition-input.vm"/>
+  </workflow-condition>
+  <!--  external device type-->
+  <web-item name="Device Types" i18n-name-key="device-types.name" key="device-types" section="atl.jira.proj.config/projectgroup3" weight="1000">
+    <description key="device-types.description">The Device Types Plugin</description>
+    <label key="device-types.label"/>
+    <link linkId="device-types-link">/secure/ExternalDeviceTypesManagementAction!default.jspa?pid=${helper.projectObject.id}&amp;projectKey=$projectKeyEncoded</link>
+    <condition class="com.cmcglobal.plugins.jira.conditions.ProjectDeviceCondition"/>
+  </web-item>
+  <webwork1 key="external-device-types-management" name="External Device Types Management" i18n-name-key="external-device-types-management.name">
+    <description key="external-device-types-management.description">The External Device Types Management Plugin</description>
+    <actions>
+      <action name="com.cmcglobal.plugins.jira.webwork.ExternalDeviceTypesManagementAction" alias="ExternalDeviceTypesManagementAction">
+        <view name="device-types">/templates/external-device-types-management/external-device-types.vm</view>
+      </action>
+    </actions>
+  </webwork1>
+  <!--end external device type-->
+  <workflow-validator key="field-validator-task" name="Field Validator Task" i18n-name-key="field-validator-task.name" class="com.cmcglobal.plugins.jira.validators.FieldValidatorTaskFactory">
+    <description key="field-validator-task.description">The Field Validator Task Plugin</description>
+    <validator-class>com.cmcglobal.plugins.jira.validators.FieldValidatorTask</validator-class>
+    <resource type="velocity" name="view" location="templates/validators/field-validator-task.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/validators/field-validator-task-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/validators/field-validator-task-input.vm"/>
+  </workflow-validator>
+  <workflow-validator key="field-validator-device-project" name="Field Validator Device Project" i18n-name-key="field-validator-device-project.name" class="com.cmcglobal.plugins.jira.validators.FieldValidatorDeviceProjectFactory">
+    <description key="field-validator-device-project.description">The Field Validator Device Project Plugin</description>
+    <validator-class>com.cmcglobal.plugins.jira.validators.FieldValidatorDeviceProject</validator-class>
+    <resource type="velocity" name="view" location="templates/validators/field-validator-device-project.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/validators/field-validator-device-project-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/validators/field-validator-device-project-input.vm"/>
+  </workflow-validator>
+  <workflow-function key="device-post-function" name="Device Post Function" i18n-name-key="device-post-function.name" class="com.cmcglobal.plugins.jira.postfunctions.DevicePostFunctionFactory">
+    <description key="device-post-function.description">The Device Post Function Plugin</description>
+    <function-class>com.cmcglobal.plugins.jira.postfunctions.DevicePostFunction</function-class>
+    <resource type="velocity" name="view" location="templates/postfunctions/device-post-function.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/postfunctions/device-post-function-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/postfunctions/device-post-function-input.vm"/>
+  </workflow-function>
+  <!-- Begin Test Execute Detail -->
+  <servlet name="Test Execute Detail Servlet" key="test-execute-detail-servlet" class="com.cmcglobal.plugins.jira.reports.TestExecuteDetailServlet">
+    <url-pattern>/test-execute-detail</url-pattern>
+  </servlet>
+  <!-- End Test Execute Detail -->
+  <servlet name="Monitor Export Servlet" i18n-name-key="monitor-export-servlet.name" key="monitor-export-servlet" class="com.cmcglobal.plugins.jira.reports.MonitorExportServlet">
+    <description key="monitor-export-servlet.description">The Monitor Export Servlet Plugin</description>
+    <url-pattern>/monitor-export</url-pattern>
+  </servlet>
+  <web-item name="Model" i18n-name-key="Model.name" key="Model" section="atl.jira.proj.config/projectgroup3" weight="45">
+    <description key="Model.description">Model Description</description>
+    <label key="model.label"/>
+    <link linkId="Model-link">/secure/ModelAction!default.jspa?pid=${helper.projectObject.id}&amp;projectKey=$projectKeyEncoded</link>
+    <condition class="com.cmcglobal.plugins.jira.conditions.ProjectEnvironmentCondition"/>
+  </web-item>
+  <webwork1 key="model" name="model" i18n-name-key="model.name">
+    <description key="model.description">Test Hu Market description</description>
+    <actions>
+      <action name="com.cmcglobal.plugins.jira.webwork.ModelAction" alias="ModelAction">
+        <view name="success">/templates/model/view.vm</view>
+      </action>
+    </actions>
+  </webwork1>
+  <servlet name="Monitor Export Chart Servlet" i18n-name-key="monitor-export-chart-servlet.name" key="monitor-export-chart-servlet" class="com.cmcglobal.plugins.servlet.TesterPerformanceChartServlet">
+    <description key="monitor-export-chart-servlet.description">The Monitor Export Servlet Plugin</description>
+    <url-pattern>/monitor-export-chart</url-pattern>
+  </servlet>
+  <!-- Begin Test Execute Chart Servlet -->
+  <servlet name="Test Execute Chart Servlet" key="test-execute-chart-servlet" class="com.cmcglobal.plugins.jira.reports.TestExecuteChartServlet">
+    <url-pattern>/test-execute-chart</url-pattern>
+  </servlet>
+  <!-- End Test Execute Chart Servlet -->
+  <web-item name=" Answers Link From Navigation" i18n-name-key="answers-link-from-navigation.name" key="answers-link-from-navigation" section="https://answers.atlassian.com/" weight="1000">
+    <description key="answers-link-from-navigation.description">The Answers Link From Navigation Plugin</description>
+    <label key="answers-link-from-navigation.label"/>
+    <link linkId="answers-link-from-navigation-link">https://answers.atlassian.com/</link>
+  </web-item>
+  <workflow-function key="test-result-post-function" name="Test Result Post Function" i18n-name-key="test-result-post-function.name" class="com.cmcglobal.plugins.jira.postfunctions.TestResultPostFunctionFactory">
+    <description key="test-result-post-function.description">The Test Result Post Function Plugin</description>
+    <function-class>com.cmcglobal.plugins.jira.postfunctions.TestResultPostFunction</function-class>
+    <resource type="velocity" name="view" location="templates/postfunctions/test-result-post-function.vm"/>
+    <resource type="velocity" name="input-parameters" location="templates/postfunctions/test-result-post-function-input.vm"/>
+    <resource type="velocity" name="edit-parameters" location="templates/postfunctions/test-result-post-function-input.vm"/>
+  </workflow-function>
+</atlassian-plugin>

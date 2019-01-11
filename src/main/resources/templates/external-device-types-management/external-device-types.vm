@@ -1,0 +1,397 @@
+<html>
+<head>
+    <title>$i18n.getText("testcase-type-nav-item.label")</title>
+
+    <meta name="decorator" content="admin"/>
+    <meta name="projectId" content="$selectedProject.id"/>
+    <meta name="projectKey" content="$selectedProject.key"/>
+    <meta name="admin.active.tab" content="device-types-link"/>
+    <meta name="admin.active.section" content="atl.jira.proj.config"/>
+
+    $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-date-picker")
+    $webResourceManager.requireResourcesForContext("jira-customize")
+
+    <style>
+        #releases-add__version .releases-add__name {
+            width: 40%;
+        }
+
+        .versions-table .versions-table__name {
+            min-width: 100px;
+            width: 40.5%;
+        }
+
+        .versions-table .versions-table__date {
+            white-space: nowrap;
+            width: 20.5%;
+        }
+
+        .aui-datepicker-dialog {
+            z-index: 4000;
+        }
+        #types-table-body tr td{
+            width: 100%;
+        }
+    </style>
+
+    <script language="javascript" type="text/javascript">
+        function formatHtml( html ) {
+            return html.replace(/</g, "&lt;").replace(/>/g, "&gt;");;
+        }
+        window.onbeforeunload = function(e) {
+            e = e || window.event;
+            if (isDirty(document.forms["releases-add__version"]) || isDirty(document.forms["editDeviceTypeForm"])) {
+                // For IE and Firefox
+                if (e) {
+                    e.returnValue = "You have unsaved changes.";
+                }
+                // For Safari
+                return "You have unsaved changes.";
+            }
+        };
+        // Check form dirty
+        function isDirty(form) {
+            for (var i = 0; i < form.elements.length; i++) {
+                var element = form.elements[i];
+                var type = element.type;
+                if (type == "checkbox" || type == "radio") {
+                    if (element.checked != element.defaultChecked) {
+                        return true;
+                    }
+                }
+                else if (type == "hidden" || type == "password" ||
+                        type == "text" || type == "textarea") {
+                    if (element.value != element.defaultValue) {
+                        return true;
+                    }
+                }
+                else if (type == "select-one" || type == "select-multiple") {
+                    for (var j = 0; j < element.options.length; j++) {
+                        if (element.options[j].selected !=
+                                element.options[j].defaultSelected) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        function editDeviceType(deviceId) {
+            // get content of dialog
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/ExternalDeviceTypesManagementAction!getCurrentDeviceType.jspa?pid=$selectedProject.id&deviceId=" + deviceId,
+                success: function (data) {
+                    createDialogEditDeviceType(data, null);
+                },
+                error: function (errors) {
+                    displayError(deviceId);
+                }
+            });
+
+        };
+        // dialog edit
+        function createDialogEditDeviceType(data, error) {
+            // Note this is a small dialog, so it fits in the Sandbox panel
+            // Standard sizes are 400, 600 and 840 pixels wide
+            var dialog = new AJS.Dialog({
+                width: 540,
+                height: 330,
+                id: "dialog-edit",
+                closeOnOutsideClick: false
+            });
+            // adds header for second page
+            dialog.addHeader('Edit');
+            //formatedString = formatHtml(data.deviceType);
+            // adds a single panel on second page (as there is only one panel, no menu will appear on the left side)
+            dialog.addPanel("SinglePanel", ` <form class="aui" id="editDeviceTypeForm" >
+                    <div id="errorID"></div>
+                    <input class="text" type="text" name="deviceId" value="${data.ID}" style="display: none;">
+                    <div class="field-group">
+                        <label for="deviceType">Device Type<span class="aui-icon icon-required"> required</span></label>
+                        <input class="text" type="text" id="type-name" name="deviceType" title="first name" maxlength="100">
+                        <div id="errorDeviceType" class="error"></div>
+                    </div>
+                </form>`, "SinglePanel");
+            $("#editDeviceTypeForm #type-name").val(data.deviceType);
+            editDeviceTypeFormData = $('#editDeviceTypeForm').serialize();
+            // add "Previous" button to page 1
+            dialog.addButton("Save", function (dialog) {
+                var dataSend = $('#editDeviceTypeForm').serialize();
+                doUpdate(dataSend, data, dialog)
+            });
+            // adds "Cancel" button to page 1
+            dialog.addLink("Cancel", function (dialog) {
+                if (editDeviceTypeFormData !== $('#editDeviceTypeForm').serialize()) {
+                    if (confirm("The change will not be save!")) {
+                        dialog.hide();
+                        dialog.remove();
+                    }
+                }
+                else {
+                    dialog.hide();
+                    dialog.remove();
+                }
+
+            }, "#");
+            dialog.show();
+        }
+
+        function doUpdate(editDeviceTypeFormData, data, dialog) {
+
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/ExternalDeviceTypesManagementAction!edit.jspa?pid=$selectedProject.id",
+                data: editDeviceTypeFormData,
+                success: function (data) {
+                    var startDate = "";
+                    if (data.startDate)
+                        startDate = moment(data.startDate).format('DD/MM/YYYY');
+                    var endDate = "";
+                    if (data.endDate)
+                        endDate = moment(data.endDate).format('DD/MM/YYYY');
+                    formatedString = formatHtml(data.deviceType);
+                    var template = `<td>
+                                        <div style="white-space:pre" id="deviceTypeName${data.ID}">${formatedString}</div>
+                                    </td>
+                                    <td class="dynamic-table__actions">
+                                        <div id="${data.ID}">
+
+                                        </div>
+                                    </td>`;
+                    $("tr[data-version-id='" + data.ID + "']").empty().append(template);
+                    var editSuccess = `<div class="operation-success"><span class="aui-icon aui-icon-small aui-iconfont-approve"></span></div>`
+                    $(`#${data.ID}`).empty().append(editSuccess);
+                    $("tr[data-version-id='" + data.ID + "']").removeClass("item-state-ready").addClass("item-state-successful")
+                    setTimeout(function () {
+                        timeOut(data);
+                    }, 1500);
+                    dialog.hide();
+                    dialog.remove();
+                },
+                error: function (errors) {
+
+                    var errors = JSON.parse(errors.responseText);
+                    if (errors.hasOwnProperty("deviceId")) {
+                        idType = $('input[name="deviceId"]').val();
+                        $("#errorID").empty().append('<div class="aui-message aui-message-error error">Could not find device type has id : ' + idType + '</div>');
+                        $("#errorDeviceType").empty();
+                    } else {
+                        $("#errorDeviceType").empty().append(errors["deviceType"]);
+                    }
+                }
+            });
+        }
+
+        // time out
+        function timeOut(data) {
+            var actionHtml = `<a href="#version-actions-${data.ID}" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-${data.ID}"
+                                               aria-expanded="false">
+                                               <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                             </a>
+                                            <div id="version-actions-${data.ID}"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editDeviceType(${data.ID})">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>`
+            $("tr[data-version-id='" + data.ID + "']").removeClass("item-state-successful").addClass("item-state-ready");
+            $(`#${data.ID}`).empty().append(actionHtml);
+        }
+
+        // display error
+        function displayError(deviceId) {
+            $("tr[data-version-id='" + deviceId + "']").css("background-color", "rgba(208,68,55,0.1)");
+            var htmlError = `<div>
+                                            <div class="operation-retry operation-delete">
+                                                <div><span class="aui-icon aui-icon-small aui-iconfont-info" title="This type already deleted!"></span>
+                                                <a href="javascript:void(0)" class="operation-retry">Retry</a>
+                                                <a href="#" tabindex="0" id="cancel"
+                                                        class="aui-icon aui-icon-small aui-iconfont-remove operation-discard"
+                                                        title="Discard !" onclick="cancel(${deviceId})">Discard</a>
+                                                        </div>
+                                            </div>
+                                        </div>`
+            $(`#${deviceId}`).empty().append(htmlError);
+        }
+
+        // cancel
+        function cancel(value) {
+            var htmlEditDelete = `<a href="#version-actions-${value}" aria-haspopup="true"
+                                                class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                                resolved="" aria-controls="version-actions-${value}"
+                                                aria-expanded="false">
+                                                 <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                             </a>
+                                             <div id="version-actions-${value}"
+                                                  class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                  resolved=""
+                                                  aria-hidden="true">
+                                                 <ul class="aui-list-truncate">
+                                                      <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editDeviceType(${value})">Edit</a>
+                                                      </li>
+                                                 </ul>
+                                             </div>`
+            $("tr[data-version-id='" + value + "']").css("background-color", "white");
+            $(`#${value}`).empty().append(htmlEditDelete);
+        };
+
+        // Clear create form
+        function clearCreateForm() {
+            document.getElementById('releases-add__version').reset();
+        }
+
+        // Create type
+        function createDeviceType() {
+            var createTypeData = $('#releases-add__version').serialize();
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/ExternalDeviceTypesManagementAction!createDeviceType.jspa?pid=$selectedProject.id",
+                data: createTypeData,
+                success: function (deviceTypes) {
+                    $(`#error-device-type`).empty();
+                    $(`#types-table-body`).empty();
+                    clearCreateForm();
+                    jQuery.each(deviceTypes, function (index, deviceType) {
+                        formatedString = formatHtml(deviceType.deviceType);
+                        $(`#types-table-body`).append(`
+                                <tr data-version-id="${deviceType.ID}" class="item-state-ready">
+                                    <td>
+                                        <div style="white-space:pre" id="deviceTypeName$type.ID()">${formatedString}</div>
+                                    </td>
+                                    <td class="dynamic-table__actions">
+                                        <div>
+                                            <a href="#version-actions-${deviceType.ID}" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-${deviceType.ID}"
+                                               aria-expanded="false">
+                                                <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                            </a>
+                                            <div id="version-actions-${deviceType.ID}"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                    <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editDeviceType(${deviceType.ID})">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
+                    });
+
+                },
+                error: function (errors) {
+                    var errors = JSON.parse(errors.responseText)
+                    $(`#error-device-type`).empty().append(errors["deviceType"]);
+                }
+            })
+        }
+        function submitFormByEnter() {
+            if (window.event.keyCode == '13'){
+                event.preventDefault();
+                createDeviceType();
+            }
+        }
+    </script>
+
+</head>
+<body class="spinner">
+<header class="aui-page-header aui-page-header-fixed__legacy">
+    <div class="aui-page-header-inner">
+        <div class="aui-page-header-image">
+            <div class="aui-avatar aui-avatar-large">
+                <div class="aui-avatar-inner project-config-icon48-versions"></div>
+            </div>
+        </div>
+        <div class="aui-page-header-main">
+            <h2>$i18n.getText("device-types.label")</h2>
+        </div>
+    </div>
+</header>
+<div id="release-page" class="releases-page-app releases-page-app__legacy" resolved="" data-ready="true">
+    <div>
+        <div id="submit-container">
+            <form id="releases-add__version" class="aui ajs-dirty-warning-subsequent-submits-allowed">
+                <div class="releases-add__name" style="width: 100%">
+                    <input id="deviceType" name="deviceType" class="text medium-long-field" type="text"
+                           placeholder="Name" maxlength="100" onkeydown="submitFormByEnter()">
+                    <div id="error-device-type" class="error-container error">
+                    </div>
+                </div>
+                <div class="releases-add__confirm">
+                    <button class="aui-button aui-button-primary" type="button" onclick="createDeviceType()">Add</button>
+                </div>
+                <input type="hidden" name="atl_token" value="$atl_token"/>
+            </form>
+        </div>
+        #set( $String = '' )##
+        <section class="aui-page-panel-content aui-page-panel-content-no-table">
+            <div id="content-container">
+                <div>
+                    <table id="versions-table" class="aui dynamic-table versions-table">
+                        <tbody class="header">
+                        <tr>
+                            <th class="versions-table__name">Name</th>
+                            <th></th>
+                        </tr>
+                        </tbody>
+                        <tbody id="types-table-body" class="items ui-sortable" style="">
+                            #if ($deviceTypes.size() > 0)
+                                #foreach( $deviceType in $deviceTypes )
+                                <tr data-version-id="$deviceType.getID()" class="item-state-ready">
+                                    <td>
+                                        <div style="white-space:pre" id="deviceTypeName$type.getID()">$deviceType.getDeviceType()</div>
+                                    </td>
+                                    <td class="dynamic-table__actions">
+
+                                        <div id="$deviceType.getID()">
+                                            <a href="#version-actions-$deviceType.getID()" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-$deviceType.getID()"
+                                               aria-expanded="false">
+                                                <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                            </a>
+                                            <div id="version-actions-$deviceType.getID()"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editDeviceType($deviceType.getID())">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                #end
+                            #end
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,32 @@
+<tr>
+    <td class="fieldLabelArea">
+        Custom Field 1:
+    </td>
+    <td nowrap>
+        <select name="startDate" id="startDate">
+            #foreach($customField in $customFields)
+                <option name="$customField.getId()" value="$customField.getId()"
+                    #if($customField.getId() == $selectedCustomField)
+                        selected
+                    #end
+                >$customField.getName()</option>
+            #end
+        </select>
+    </td>
+</tr>
+<tr>
+    <td class="fieldLabelArea">
+        Custom Field 2:
+    </td>
+    <td nowrap>
+        <select name="endDate" id="endDate">
+            #foreach($customField in $customFields)
+                <option name="$customField.getId()" value="$customField.getId()"
+                    #if($customField.getId() == $selectedCustomField)
+                        selected
+                    #end
+                >$customField.getName()</option>
+            #end
+        </select>
+    </td>
+</tr>

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Teams management</title>
+    $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-page-layout")
+    <style>
+        .teams-container {
+            margin: -20px;
+        }
+
+        .teams-content {
+            width: 80%;
+            margin: 0 auto;
+        }
+
+        .team-detail-dialog .aui-icon-small:before {
+            font-size: 24px;
+            margin-top: -12px;
+        }
+    </style>
+
+    <script language="javascript" type="text/javascript">
+        var selectedTeamId;
+
+        function viewTeamDetail(teamId, teamName) {
+            selectedTeamId = teamId;
+            // get content of dialog
+            jQuery.ajax({
+                type: "post",
+                url: AJS.$("#base-url").val() + '/secure/TeamsManagementAction!viewTeamDetail.jspa?teamId=' + teamId + '&pid=' + AJS.$("#pid").val(),
+                success: function (data) {
+                    $("#team-name-label").empty().append(teamName);
+                    fillMembersTable(data.members);
+                    fillUsersAuiSelect(data.qcs);
+                    AJS.dialog2("#team-detail-dialog").show();
+                },
+                error: function (errors) {
+                    alert("An error has occurred. Please reload the page and try again.")
+                }
+            });
+        }
+
+        function fillMembersTable(members) {
+            $(`#members-table-body`).empty();
+            if(members.length == 0)
+                $(`#members-table-body`).append(`
+                    <tr class="item-state-ready">
+                        <td colspan="2" style="text-align: center;">No data to display.</td>
+                    </tr>
+                `)
+            else
+                jQuery.each(members, function (index, member) {
+                    $(`#members-table-body`).append(`
+                       <tr class="item-state-ready">
+                            <td>${member.lowerUserName}</td>
+                            <td>
+                                <a href="javascript:void(0)" onclick="removeMember(${member.id})">
+                                    <span class="aui-icon aui-icon-small aui-iconfont-remove-label" style="color: #d84321;"></span>
+                                </a>
+                            </td>
+                       </tr>
+                    `)
+                })
+        }
+
+        function fillUsersAuiSelect(qcs) {
+            var options = "";
+            jQuery.each(qcs, function (index, qc) {
+                options = options + "<aui-option value=" + qc.id + ">" + qc.lowerUserName + "</aui-option>"
+            })
+            $(`#user-select-span`).empty().append(`
+                <aui-select id="user-select" name="users" placeholder="Please input a name...">
+                    ${options}
+                </aui-select>
+            `)
+        }
+
+        function addMember() {
+            var userId = document.getElementById("user-select").value;
+            if (userId === null || userId === '')
+                $(`#error-message`).empty().append('Please choose a correct user.');
+            else
+                jQuery.ajax({
+                    type: "post",
+                    url: AJS.$("#base-url").val() + '/secure/TeamsManagementAction!addOnlyMember.jspa?userId=' + userId + '&teamId=' + selectedTeamId + '&pid=' + AJS.$("#pid").val(),
+                    success: function (data) {
+                        $(`#error-message`).empty();
+                        if (data.errors && data.errors.addingErrors)
+                            $(`#error-message`).append(data.errors.addingErrors);
+                        fillMembersTable(data.members);
+                        fillUsersAuiSelect(data.qcs);
+                    },
+                    error: function (errors) {
+                        alert("An error has occurred. Please reload the page and try again.");
+                    }
+                });
+        }
+
+        function removeMember(memberId) {
+            jQuery.ajax({
+                type: "post",
+                url: AJS.$("#base-url").val() + '/secure/TeamsManagementAction!removeMember.jspa?userId=' + memberId + '&teamId=' + selectedTeamId + '&pid=' + AJS.$("#pid").val(),
+                success: function (data) {
+                    $(`#error-message`).empty();
+                    if (data.errors && data.errors.removingErrors)
+                        $(`#error-message`).append(data.errors.removingErrors);
+                    fillMembersTable(data.members);
+                    fillUsersAuiSelect(data.qcs);
+                },
+                error: function (errors) {
+                    alert("An error has occurred. Please reload the page and try again.");
+                }
+            });
+        }
+
+        function closeTeamDetailDialog() {
+            document.getElementById("add-member-form").reset();
+            $(`#error-message`).empty();
+            AJS.dialog2("#team-detail-dialog").hide();
+        }
+    </script>
+</head>
+<body>
+<div class="teams-container">
+    <input type="text" id="base-url" value="$baseUrl" hidden="hidden">
+    <input type="text" id="pid" value="$pid" hidden="hidden">
+    <header class="aui-page-header aui-page-header-fixed header-with-border">
+        <div class="aui-page-header-inner">
+            <h1>
+            <span class="reports-subnav-container">
+                <span id="reports-subnav-title">
+                    <span class="subnavigator-title">Teams management</span>
+                </span>
+                <span id="reports-subnav-trigger"></span>
+            </span>
+            </h1>
+            <span id="reports-subnav-opts"></span>
+        </div>
+    </header>
+    <div class="teams-content">
+        <section class="aui-page-panel-content aui-page-panel-content-no-table">
+            <div id="content-container">
+                <table id="versions-table" class="aui dynamic-table versions-table">
+                    <tbody class="header">
+                    <tr>
+                        <th style="width: 90%">Team</th>
+                        <th>Action</th>
+                    </tr>
+                    </tbody>
+                    <tbody class="items ui-sortable" style="">
+                        #if ($qcLeaders.size() > 0)
+                            #foreach( $qcLeader in $qcLeaders )
+                            <tr class="item-state-ready">
+                                <td>$qcLeader.displayName ($qcLeader.key)</td>
+                                <td><a href="javascript:void(0)"
+                                       onclick="viewTeamDetail($qcLeader.id, '$qcLeader.displayName')">Detail</a></td>
+                            </tr>
+                            #end
+                        #end
+                        #if ($qcLeaders.size() == 0)
+                        <tr class="item-state-ready ">
+                            <td colspan="2" style="text-align: center;">No data to display.</td>
+                        </tr>
+                        #end
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        <!-- Begin team detail dialog-->
+        <section id="team-detail-dialog" class="aui-dialog2 aui-dialog2-medium aui-layer" role="dialog" aria-hidden="true"
+                 data-aui-modal="true">
+            <header class="aui-dialog2-header">
+                <h2 class="aui-dialog2-header-main">Team detail</h2>
+                <a class="aui-dialog2-header-close">
+                    <span class="aui-icon aui-icon-small aui-iconfont-close-dialog">Close</span>
+                </a>
+            </header>
+            <div class="aui-dialog2-content">
+                <div class="team-detail-dialog">
+                    <div class="aui-group">
+                        <aui-label for="team-name-title-label">Team: </label><label id="team-name-label"
+                                                                                    style="font-weight: bold;"></aui-label>
+                    </div>
+                    <div class="aui-group">
+                        <form id="add-member-form" class="aui">
+                            <aui-label for="user-select">New member:</aui-label>
+                            <p>
+                                <span id="user-select-span"></span>
+                                <a href="javascript:void(0)" onclick="addMember()">
+                                    <span class="aui-icon aui-icon-small aui-iconfont-add"></span>
+                                </a>
+                            </p>
+                            <div id="error-message" class="error-container error"></div>
+                        </form>
+                    </div>
+                    <div class="aui-group">
+                        <table id="versions-table" class="aui dynamic-table versions-table">
+                            <tbody class="header">
+                            <tr>
+                                <th style="width: 90%">Name</th>
+                                <th>Action</th>
+                            </tr>
+                            </tbody>
+                            <tbody id="members-table-body" class="items ui-sortable" style="">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <footer class="aui-dialog2-footer">
+                <div class="aui-dialog2-footer-actions">
+                    <a href="javascript:void(0)" id="dialog-close-button" class="aui-button aui-button-link cancel"
+                       onclick="closeTeamDetailDialog()">Close</a>
+                </div>
+            </footer>
+        </section>
+        <!-- End team detail dialog-->
+    </div>
+</div>
+</body>
+</html>

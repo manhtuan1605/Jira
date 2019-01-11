@@ -1,0 +1,94 @@
+{
+  "issue-type-scheme":
+  {
+    "name": "qna.project.template.issuetype.scheme.name",
+    "description": "qna.project.template.issuetype.scheme.description",
+    "issue-types": [
+      {
+        "key": "qna",
+        "name": "QnA",
+        "description": "A problem which impairs or prevents the functions of the product.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme":"qnaDefaultScreenScheme"
+      },
+      {
+        "key": "defect",
+        "name": "Defect",
+        "description": "A problem which impairs or prevents the functions of the product.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme":"defectDefaultScreenScheme"
+      }
+    ]
+  },
+  "workflow-scheme":
+  {
+    "name": "qna.project.template.workflow.scheme.name",
+    "description": "qna.project.template.workflow.scheme.description",
+    "default-workflow": "wf4",
+    "workflows": [
+      {
+        "key": "wf4",
+        "name": "qna.project.template.workflow.wf4.name",
+        "workflow-bundle": "/wfb/Workflow-for-Q&A-Project.jwb"
+      }
+    ]
+  },
+  "issue-type-screen-scheme":
+  {
+    "name": "QnA Management Issue Type Screen Scheme",
+    "description": "A collection of tabs and fields, used for tracking QnA and Projects.",
+    "default-screen-scheme": "qnaDefaultScreenScheme",
+    "screens": [
+      {
+        "key": "qnaDefaultScreen",
+        "name": "QnA Management Default QnA Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields":[
+              "summary",
+              "issuetype",
+              "description",
+              "duedate",
+              "reporter",
+              "assignee",
+              "labels"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "defectDefaultScreen",
+        "name": "Defect Management Default Defect Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields":[
+              "summary",
+              "issuetype",
+              "description",
+              "components",
+              "priority",
+              "duedate",
+              "reporter",
+              "assignee",
+              "labels"
+            ]
+          }
+        ]
+      }
+    ],
+    "screen-schemes": [
+      {
+        "key": "qnaDefaultScreenScheme",
+        "name": "QnA Management Screen Scheme",
+        "default-screen": "qnaDefaultScreen"
+      },
+      {
+        "key": "defectDefaultScreenScheme",
+        "name": "Defect Management Screen Scheme",
+        "default-screen": "defectDefaultScreen"
+      }
+    ]
+  }
+}

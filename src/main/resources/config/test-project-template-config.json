@@ -1,0 +1,196 @@
+{
+  "issue-type-scheme": {
+    "name": "test.project.template.issuetype.scheme.name",
+    "description": "test.project.template.issuetype.scheme.description",
+    "issue-types": [
+      {
+        "key": "testCase",
+        "name": "Test Case",
+        "description": "A problem which impairs or prevents the functions of the product.",
+        "icon": "/images/icons/bug.png",
+        "workflow": "wf3",
+        "screen-scheme": "testcaseDefaultScreenScheme"
+      },
+      {
+        "key": "task",
+        "name": "Task",
+        "description": "A problem which impairs or prevents the functions of the product.",
+        "icon": "/images/icons/bug.png",
+        "workflow": "wf5",
+        "screen-scheme": "taskDefaultScreenScheme"
+      }
+    ]
+  },
+  "workflow-scheme": {
+    "name": "test.project.template.workflow.scheme.name",
+    "description": "test.project.template.workflow.scheme.description",
+    "default-workflow": "wf3",
+    "workflows": [
+      {
+        "key": "wf3",
+        "name": "test.project.template.workflow.wf3.name",
+        "workflow-bundle": "/wfb/Test-Project.jwb"
+      },
+      {
+        "key": "wf5",
+        "name": "test.project.template.workflow.wf5.name",
+        "workflow-bundle": "/wfb/Test-Project-Task.jwb"
+      }
+    ]
+  },
+  "issue-type-screen-scheme": {
+    "name": "Testcase Management Issue Type Screen Scheme",
+    "description": "A collection of tabs and fields, used for tracking Testcases and Projects.",
+    "default-screen-scheme": "testcaseDefaultScreenScheme",
+    "screens": [
+      {
+        "key": "testcaseDefaultScreen",
+        "name": "Testcase Management Default Testcase Screen",
+        "tabs": [
+          {
+            "name": "Test Case",
+            "fields": [
+              "summary",
+              "issuetype",
+              "security",
+              "components",
+              "priority",
+              "duedate",
+              "reporter",
+              "assignee",
+              "labels"
+            ]
+          },
+          {
+            "name": "Test Result",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "testcaseCreateScreen",
+        "name": "Testcase Management Create Testcase Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": [
+              "summary",
+              "issuetype",
+              "security",
+              "components",
+              "priority",
+              "duedate",
+              "reporter",
+              "assignee",
+              "labels"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "testcaseEditScreen",
+        "name": "Testcase Management Edit Testcase Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": [
+              "summary",
+              "issuetype",
+              "security",
+              "components",
+              "priority",
+              "duedate",
+              "reporter",
+              "assignee",
+              "labels"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "testcaseOKScreen",
+        "name": "Testcase Management OK Testcase Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "testcasePlanScreen",
+        "name": "Testcase Management Plan Testcase Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "testcasePendingScreen",
+        "name": "Testcase Management Pending Testcase Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "testcaseNGScreen",
+        "name": "Testcase Management NG Testcase Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "testcaseOutOfScopeScreen",
+        "name": "Testcase Management Out Of Scope Testcase Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "taskDefaultScreen",
+        "name": "Task Management Default Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": [
+              "summary",
+              "issuetype",
+              "security",
+              "components",
+              "priority",
+              "duedate",
+              "reporter",
+              "assignee",
+              "labels"
+            ]
+          }
+        ]
+      }
+    ],
+    "screen-schemes": [
+      {
+        "key": "testcaseDefaultScreenScheme",
+        "name": "Testcase Management Screen Scheme",
+        "default-screen": "testcaseDefaultScreen",
+        "create-screen": "testcaseCreateScreen",
+        "edit-screen": "testcaseEditScreen"
+      },
+      {
+        "key": "taskDefaultScreenScheme",
+        "name": "Task Management Screen Scheme",
+        "default-screen": "taskDefaultScreen"
+      }
+    ]
+  }
+}

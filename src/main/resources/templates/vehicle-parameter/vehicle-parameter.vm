@@ -1,0 +1,401 @@
+<html>
+<head>
+    <title>$i18n.getText("vehicle-parameter.label")</title>
+
+    <meta name="decorator" content="admin"/>
+    <meta name="projectId" content="$selectedProject.id"/>
+    <meta name="projectKey" content="$selectedProject.key"/>
+    <meta name="admin.active.section" content="atl.jira.proj.config"/>
+
+    $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-date-picker")
+    $webResourceManager.requireResourcesForContext("jira-customize")
+
+    <script>
+        function formatHtml( html ) {
+            return html.replace(/</g, "&lt;").replace(/>/g, "&gt;");;
+        }
+        window.onbeforeunload = function(e) {
+            e = e || window.event;
+            if (isDirty(document.forms["releases-add__version"])) {
+                // For IE and Firefox
+                if (e) {
+                    e.returnValue = "You have unsaved changes.";
+                }
+                // For Safari
+                return "You have unsaved changes.";
+            }
+        };
+        // Check form dirty
+        function isDirty(form) {
+            for (var i = 0; i < form.elements.length; i++) {
+                var element = form.elements[i];
+                var type = element.type;
+                if (type == "checkbox" || type == "radio") {
+                    if (element.checked != element.defaultChecked) {
+                        return true;
+                    }
+                }
+                else if (type == "hidden" || type == "password" ||
+                        type == "text" || type == "textarea") {
+                    if (element.value != element.defaultValue) {
+                        return true;
+                    }
+                }
+                else if (type == "select-one" || type == "select-multiple") {
+                    for (var j = 0; j < element.options.length; j++) {
+                        if (element.options[j].selected !=
+                                element.options[j].defaultSelected) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function editVehicleParameter(vehicleParameterId) {
+            // get content of dialog
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/VehicleParameterAction!getCurrentVehicleParameter.jspa?projectId=$selectedProject.id&vehicleParameterId=" + vehicleParameterId,
+                success: function (data) {
+                    createDialogEditVehicleParameter(data, null);
+                },
+                error: function (errors) {
+                    displayError(vehicleParameterId);
+                }
+            });
+
+        };
+
+        // Create vehicle Parameter
+        function createVehicleParameter() {
+            var createVehicleParameterData = $('#releases-add__version').serialize();
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/VehicleParameterAction!create.jspa?projectId=$selectedProject.id",
+                data: createVehicleParameterData,
+                success: function (vehicles) {
+                    $(`#error-vehicle-parameter-name`).empty();
+                    $(`#vehicles-table-body`).empty();
+                    clearCreateForm();
+                    jQuery.each(vehicles, function (index, vehicle) {
+                        formatedString = formatHtml(vehicle.vehicleParameterName);
+                        $(`#vehicles-table-body`).append(`
+                                <tr data-version-id="${vehicle.id}" class="item-state-ready">
+                                    <td>
+                                        <div style="white-space:pre" id="vehicleParameterName$vehicle.id()">${formatedString}</div>
+                                    </td>
+
+                                    <td class="dynamic-table__actions">
+                                        <div>
+                                            <a href="#version-actions-${vehicle.id}" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-${vehicle.id}"
+                                               aria-expanded="false">
+                                                <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                            </a>
+                                            <div id="version-actions-${vehicle.id}"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                    <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editVehicleParameter(${vehicle.id})">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
+                    });
+
+                },
+                error: function (errors) {
+                    var error = JSON.parse(errors.responseText);
+                    $(`#error-vehicle-parameter-name`).empty().append(error["vehicleParameterName"]);
+                }
+            })
+        }
+
+        // dialog edit
+        function createDialogEditVehicleParameter(data, error) {
+            // Note this is a small dialog, so it fits in the Sandbox panel
+            // Standard sizes are 400, 600 and 840 pixels wide
+            var dialog = new AJS.Dialog({
+                width: 540,
+                height: 249,
+                id: "dialog-edit",
+                closeOnOutsideClick: false
+            });
+            // adds header for second page
+            dialog.addHeader('Edit');
+
+            // adds a single panel on second page (as there is only one panel, no menu will appear on the left side)
+            dialog.addPanel("SinglePanel", ` <form class="aui" id="editVehicleParameterForm" >
+                    <div id="errorID"></div>
+                    <input class="text" type="text" name="vehicleParameterId" value="${data.id}" style="display: none;">
+                    <div class="field-group">
+                        <label id="labelEditVehicleParameterName" for="vehicleParameterName">Vehicle Parameter Name<span class="aui-icon icon-required"> required</span></label>
+                        <input class="text vehicle-parameter-name" type="text" id="required-input" name="vehicleParameterName" title="first name" maxlength="100">
+                        <div id="errorVehicleParameterName" class="error"></div>
+                    </div>
+                </form>`, "SinglePanel");
+            $("#editVehicleParameterForm #required-input").val(data.vehicleParameterName);
+            editVehicleParameterFormData = $('#editVehicleParameterForm').serialize();
+            // add "Previous" button to page 1
+            dialog.addButton("Save", function (dialog) {
+                var dataSend = $('#editVehicleParameterForm').serialize();
+                doUpdate(dataSend, data, dialog);
+            });
+            // adds "Cancel" button to page 1
+            dialog.addLink("Cancel", function (dialog) {
+                if (editVehicleParameterForm !== $('#editVehicleParameterForm').serialize()) {
+                    if (confirm("The change will not be save!")) {
+                        dialog.hide();
+                        dialog.remove();
+                    }
+                }
+                else {
+                    dialog.hide();
+                    dialog.remove();
+                }
+
+            }, "#");
+            dialog.show();
+        }
+
+        function doUpdate(editVehicleParameterFormData, data, dialog) {
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/VehicleParameterAction!edit.jspa?projectId=$selectedProject.id",
+                data: editVehicleParameterFormData,
+                success: function (data) {
+                    formatedString = formatHtml(data.vehicleParameterName);
+                    var template = `<td>
+                                        <div style="white-space:pre" id="vehicleParameterName${data.id}">${formatedString}</div>
+                                    </td>
+                                    <td class="dynamic-table__actions">
+                                        <div id="${data.id}">
+                                        </div>
+                                    </td>`;
+                    $("tr[data-version-id='" + data.id + "']").empty().append(template);
+                    var editSuccess = `<div class="operation-success"><span class="aui-icon aui-icon-small aui-iconfont-approve"></span></div>`
+                    $(`#${data.id}`).empty().append(editSuccess);
+                    $("tr[data-version-id='" + data.id + "']").removeClass("item-state-ready").addClass("item-state-successful")
+                    setTimeout(function () {
+                        timeOut(data);
+                    }, 1500);
+                    dialog.hide();
+                    dialog.remove();
+                },
+                error: function (errors) {
+
+                    var errors = JSON.parse(errors.responseText);
+                    if (errors.hasOwnProperty("vehicleParameterId")) {
+                        idVehicleParameter = $('input[name="vehicleParameterId"]').val();
+                        $("#errorID").empty().append('<div class="aui-message aui-message-error error">Could not find Vehicle Parameter has id : ' + idVehicleParameter + '</div>');
+                        $("#errorVehicleParameterName").empty();
+                    } else {
+                        $("#errorVehicleParameterName").empty().append(errors["vehicleParameterName"]);
+                    }
+                }
+            });
+        }
+
+        // time out
+        function timeOut(data) {
+            var actionHtml = `<a href="#version-actions-${data.id}" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-${data.id}"
+                                               aria-expanded="false">
+                                               <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                             </a>
+                                            <div id="version-actions-${data.id}"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editVehicleParameter(${data.id})">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>`
+            $("tr[data-version-id='" + data.id + "']").removeClass("item-state-successful").addClass("item-state-ready");
+            $(`#${data.id}`).empty().append(actionHtml);
+        }
+
+        // display error
+        function displayError(vehicleParameterId) {
+            $("tr[data-version-id='" + vehicleParameterId + "']").css("background-color", "rgba(208,68,55,0.1)");
+            var htmlError = `<div>
+                                            <div class="operation-retry operation-delete">
+                                                <div><span class="aui-icon aui-icon-small aui-iconfont-info" title="This vehicle parameter already deleted!"></span>
+                                                <a href="javascript:void(0)" class="operation-retry">Retry</a>
+                                                <a href="#" tabindex="0" id="cancel"
+                                                        class="aui-icon aui-icon-small aui-iconfont-remove operation-discard"
+                                                        title="Discard !" onclick="cancel(${vehicleParameterId})">Discard</a>
+                                                        </div>
+                                            </div>
+                                        </div>`
+            $(`#${vehicleParameterId}`).empty().append(htmlError);
+        }
+
+        // cancel
+        function cancel(value) {
+            var htmlEditDelete = `<a href="#version-actions-${value}" aria-haspopup="true"
+                                                class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                                resolved="" aria-controls="version-actions-${value}"
+                                                aria-expanded="false">
+                                                 <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                             </a>
+                                             <div id="version-actions-${value}"
+                                                  class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                  resolved=""
+                                                  aria-hidden="true">
+                                                 <ul class="aui-list-truncate">
+                                                      <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editVehicleParameter(${value})">Edit</a>
+                                                      </li>
+                                                 </ul>
+                                             </div>`
+            $("tr[data-version-id='" + value + "']").css("background-color", "white");
+            $(`#${value}`).empty().append(htmlEditDelete);
+        };
+
+        // Clear create form
+        function clearCreateForm() {
+            document.getElementById('releases-add__version').reset();
+        }
+        function submitFormCreateByEnter() {
+            if (window.event.keyCode == '13'){
+                event.preventDefault();
+                createVehicleParameter();
+            }
+        }
+
+    </script>
+
+    <style>
+        #releases-add__version .releases-add__name {
+            width: 89%;
+        }
+
+        .versions-table .versions-table__name {
+            min-width: 100px;
+            width: 100%;
+        }
+
+        .versions-table .versions-table__date {
+            white-space: nowrap;
+            width: 20.5%;
+        }
+
+        .aui-datepicker-dialog {
+            z-index: 4000;
+        }
+
+        #labelEditVehicleParameterName {
+            padding: 0px 0px;
+        }
+
+        .vehicle-parameter-name {
+            max-width: 335px;
+        }
+
+        span.aui-icon.icon-required {
+            margin-left: 3px;
+        }
+
+
+    </style>
+</head>
+
+<body class="spinner">
+    <header class="aui-page-header aui-page-header-fixed__legacy">
+        <div class="aui-page-header-inner">
+            <div class="aui-page-header-image">
+                <div class="aui-avatar aui-avatar-large">
+                    <div class="aui-avatar-inner project-config-icon48-versions"></div>
+                </div>
+            </div>
+            <div class="aui-page-header-main">
+                <h2>$i18n.getText("vehicle-parameter.label")</h2>
+            </div>
+        </div>
+    </header>
+    <div id="release-page" class="releases-page-app releases-page-app__legacy" resolved="" data-ready="true">
+        <div id="submit-container">
+            <form id="releases-add__version" class="aui ajs-dirty-warning-subsequent-submits-allowed">
+                <div class="releases-add__name">
+                    <input id="required-input" name="vehicleParameterName" class="text medium-long-field" type="text"
+                           placeholder="Vehicle Parameter Name" maxlength="100" onkeydown="submitFormCreateByEnter()">
+                    <div id="error-vehicle-parameter-name" class="error-container error">
+                    </div>
+                </div>
+
+                <div class="releases-add__confirm">
+                    <button class="aui-button aui-button-primary" type="button" onclick="createVehicleParameter()">Add</button>
+                </div>
+                <input type="hidden" name="atl_token" value="$atl_token"/>
+            </form>
+        </div>
+        <section class="aui-page-panel-content aui-page-panel-content-no-table">
+            <div id="content-container">
+                <div>
+                    <table id="versions-table" class="aui dynamic-table versions-table">
+                        <tbody class="header">
+                        <tr>
+                            <th class="versions-table__name">Vehicle Parameter</th>
+                            <th></th>
+                        </tr>
+                        </tbody>
+                        <tbody id="vehicles-table-body" class="items ui-sortable" style="">
+                            #if ($vehicles.size() > 0)
+                                #foreach( $vehicle in $vehicles )
+                                <tr data-version-id="$vehicle.getID()" class="item-state-ready">
+                                    <td>
+                                        <div style="white-space:pre" id="vehicleParameterName$vehicle.getID()">$vehicle.getVehicleParameterName()</div>
+                                    </td>
+                                    <td class="dynamic-table__actions">
+
+                                        <div id="$vehicle.getID()">
+                                            <a href="#version-actions-$vehicle.getID()" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-$vehicle.getID()"
+                                               aria-expanded="false">
+                                                <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                            </a>
+                                            <div id="version-actions-$vehicle.getID()"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editVehicleParameter($vehicle.getID())">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                #end
+                            #end
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

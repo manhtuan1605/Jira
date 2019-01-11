@@ -1,0 +1,577 @@
+<html>
+<head>
+    <title>Import Test Case</title>
+    <meta name="projectId" content="$selectedProject.id"/>
+    <meta name="projectKey" content="$selectedProject.key"/>
+
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-experimental-spinner")
+    $webResourceManager.requireResourcesForContext("jira-customize")
+
+    <style>
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        .main-loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1999;
+            background: rgba(0, 0, 0, 0.46);
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .main-loading .wrap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -webkit-transform: translate(-50%, -50%);
+            -moz-transform: translate(-50%, -50%);
+            -o-transform: translate(-50%, -50%);
+        }
+
+        .main-loading .wrap .text {
+            color: white;
+            text-align: center;
+            margin-top: 10px
+        }
+
+        .main-loading .wrap svg path {
+            fill: #00ffbf;
+        }
+
+        .magrinLeft20 {
+            margin: -20px;
+        }
+
+        #drop-area {
+            border: 2px dashed #ccc;
+            width: 610px;
+            font-family: sans-serif;
+            padding: 50px;
+        }
+
+        #drop-area.highlight {
+            border-color: purple;
+        }
+
+        p {
+            margin-top: 0;
+        }
+
+        .my-form {
+            margin-left: 10px;
+        }
+
+        #gallery {
+            margin-top: 10px;
+        }
+
+        #gallery img {
+            width: 150px;
+            margin-bottom: 10px;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px;
+            background: #ccc;
+            cursor: pointer;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+
+        .button:hover {
+            background: #ddd;
+        }
+
+        .column10 {
+            width: 10% !important;
+            word-break: break-word;
+        }
+
+        .column20 {
+            width: 20% !important;
+            word-break: break-word;
+        }
+
+        .column25 {
+            width: 25% !important;
+            word-break: break-word;
+        }
+
+        #input-file {
+            display: none;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        div.divGroup .divName {
+            font-size: 15px;
+            line-height: normal;
+            padding: 2px 5px 2px 0;
+            word-break: break-word;
+            word-wrap: break-word;
+            color: #707070
+        }
+
+        .divValue {
+            font-size: 15px;
+            line-height: normal;
+            word-break: break-word;
+            word-wrap: break-word;
+        }
+
+        #notgood-pending-dialog {
+            width: 810px !important;
+        }
+
+        .error_data {
+            margin-top: 10px;
+            font-weight: bold;
+            font-style: italic;
+            text-align: center;
+        }
+    </style>
+    <script>
+        var isCheckDirty = false;
+        AJS.$(document).ready(function () {
+            $('#btn-import-file').prop("disabled", true);
+            /*// var dropArea = document.getElementById("drop-area")
+            ;['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                document.getElementById("drop-area").addEventListener(eventName, preventDefaults, false)
+                document.body.addEventListener(eventName, preventDefaults, false)
+            })
+
+            // Highlight drop area when item is dragged over it
+            ;['dragenter', 'dragover'].forEach(eventName => {
+                // document.getElementById("drop-area").addEventListener(eventName, highlight, false)
+                document.body.addEventListener(eventName, preventDefaults, false)
+            })
+
+            ;['dragleave', 'drop'].forEach(eventName => {
+                // document.getElementById("drop-area").addEventListener(eventName, unhighlight, false)
+                document.body.addEventListener(eventName, preventDefaults, false)
+            })
+
+            // Handle dropped files
+            document.getElementById("drop-area").addEventListener('drop', handleDrop, false)*/
+
+            jQuery('#cancel-upload').click(function () {
+                $('#btn-import-file').prop("disabled", true);
+                AJS.progressBars.setIndeterminate("#some-id");
+                document.getElementById('gallery').style.display = "none";
+                $('#input-file').val('');
+            })
+            window.onbeforeunload = function (e) {
+                if ($('#input-file').val() || isCheckDirty) {
+                    var message = "Are you sure you want leave?";
+                    e.returnValue = message;
+                    return message;
+                }
+                return;
+            };
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault()
+            e.stopPropagation()
+        }
+
+        function highlight(e) {
+            document.getElementById("drop-area").classList.add('highlight')
+        }
+
+        function unhighlight(e) {
+            document.getElementById("drop-area").classList.remove('active')
+        }
+
+        function handleDrop(e) {
+            var dt = e.dataTransfer
+            var files = dt.files
+
+            handleFiles(files)
+        }
+
+        function handleFiles(files) {
+            $('#btn-import-file').prop("disabled", false);
+            $('#display-message-error').empty();
+            files = [...files]
+            // initializeProgress(files.length)
+            files.forEach(previewFile)
+        }
+
+        function previewFile(file) {
+            var sizeFile = Math.floor(file.size / 1024 / 1024) < 1 ? file.size / 1024 : file.size / 1024 / 1024;
+            var sizeFileDisplay = Math.floor(file.size / 1024 / 1024) < 1 ? "KB" : "MB";
+            let reader = new FileReader()
+            reader.readAsDataURL(file)
+            reader.onloadend = function () {
+                jQuery('#label-file').empty().append(file.name)
+                jQuery('#size-file').empty().append(`${sizeFile.toFixed(2)}${sizeFileDisplay}`)
+                document.getElementById('gallery').style.display = "block";
+                AJS.progressBars.update("#some-id", 0);
+                AJS.progressBars.update("#some-id", 1);
+            }
+        }
+
+        function submitImport(projectId) {
+            $('.main-loading').css('display', 'block');
+            var phase = $('#select-phase').val();
+            var testCaseType = $('#select-test-case-type').val();
+            var importType = $('#select-import-type').val()
+            var url = `${$('#url-base').val()}/plugins/servlet/importtestcaseservlet?pid=${projectId}&phaseId=${phase}&testcasetype=${testCaseType}&importType=${importType}`
+            jQuery.ajax({
+                type: "post",
+                url: url,
+                data: new FormData($('#import-file')[0]),
+                timeout: 0,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    // location.reload();
+                    if (data.listUploadFiles && data.listUploadFiles.length > 0) {
+                        $('.tblody').empty();
+                        for (var fileUpload of data.listUploadFiles) {
+                            var createDate = moment(fileUpload.createDate).format('hh:mm:ss DD/MM/YYYY');
+                            var isRemoveFileValid = fileUpload.status == 'Imported' ? `<a
+                        href="${$('#url-base').val()}/plugins/servlet/uploadfileservlet?action=remove&filename=${`${fileUpload.pathFileValid}/${fileUpload.uploadFileName}`}&pid=${projectId}">$i18n.getText(
+                                "import-test-case.remove")</a>` : ``;
+                            var htmlFileName = fileUpload.uploadFileName ? `${fileUpload.uploadFileName}
+                               <span style="float: right">
+                                <a href="${$('#url-base').val()}/plugins/servlet/uploadfileservlet?action=download&filename=${`${fileUpload.pathFileValid}/${fileUpload.uploadFileName}`}&pid=${projectId}">$i18n.getText(
+                                "import-test-case.dowload")</a> | ${isRemoveFileValid}
+                                </span>` : ``;
+                            var htmlInvalidFileName = fileUpload.uploadFileNameInvalid ? `${fileUpload.uploadFileNameInvalid}
+                                <span style="float: right">
+                                <a href="${$('#url-base').val()}/plugins/servlet/uploadfileservlet?action=download&filename=${`${fileUpload.pathFileInvalid}/${fileUpload.uploadFileNameInvalid}`}&pid=${projectId}">$i18n.getText(
+                                "import-test-case.dowload")</a> | <a
+                        href="${$('#url-base').val()}/plugins/servlet/uploadfileservlet?action=remove&filename=${`${fileUpload.pathFileInvalid}/${fileUpload.uploadFileNameInvalid}`}&pid=${projectId}">$i18n.getText(
+                                "import-test-case.remove")</a>
+                                </span>` : ``;
+                            $('.tblody').append(`<tr><td headers="basic-number" class="column25">${htmlFileName}</td>
+                                                <td headers="basic-fname" class="column10">${fileUpload.type}</td>
+                                                <td headers="basic-lname" class="column10">${createDate}</td>
+                                                <td headers="basic-username" class="column25">${htmlInvalidFileName}</td>
+                                                ## <td headers="basic-number">${fileUpload.progress}</td>
+                                                <td headers="basic-status" class="column10">${fileUpload.status}</td>
+                                                <td headers="basic-message" class="column20">${fileUpload.lastMessage}</td>
+                                            </tr>`)
+                        }
+                        $('.error_data').css('display', 'none');
+                    }
+                    $('#input-file').val('');
+                    $('#select-phase').val('');
+                    $('#select-test-case-type').val('');
+                    $('#display-message-error').empty().append(`<div class="aui-message success" style="width: 50%;margin-top: 20px">
+                                                                         <p class="title">
+                                                                            <span class="aui-icon icon-success"></span>
+                                                                            <strong>Upload File Success!</strong>
+                                                                         </p>
+                                                                         <p>Please, waiting server...</p>
+                                                                     </div>`)
+                    $('#btn-import-file').prop("disabled", true);
+                    $('#gallery').css('display', 'none')
+                    isCheckDirty = false;
+                    var urlGet = `${$('#url-base').val()}/plugins/servlet/importtestcaseservlet?pid=${projectId}&fileName=${data.fileName}`
+                    jQuery.ajax({
+                        type: "put",
+                        url: urlGet,
+                        timeout: 0,
+                        processData: false,
+                        contentType: false,
+                        success: function (data) {
+                            console.log(data)
+                        },
+                        error: function (errors) {
+                            console.log(errors);
+                            if (errors && errors.responseText) {
+                                var errors = JSON.parse(errors.responseText);
+                                var errorService = errors["errorService"];
+                                if (errors["errorService"]) {
+                                    $('#display-message-error').empty().append(`<div class="aui-message error" style="width: 50%;margin-top: 20px">
+                                                                         <p class="title">
+                                                                            <span class="aui-icon icon-error"></span>
+                                                                            <strong>Import Error!</strong>
+                                                                         </p>
+                                                                        <p>${errorService}</p>
+                                                                     </div>`)
+                                }
+                            }
+                        }
+                    })
+                    $('.main-loading').css('display', 'none');
+                },
+                error: function (errors) {
+                    if (errors && errors.responseText) {
+                        var errors = JSON.parse(errors.responseText);
+                        var errorService = errors["errorService"];
+                        if (errors["phaseID"] && errors["testCaseType"]) {
+                            $('#display-message-error').empty().append(`<div class="aui-message error" style="width: 50%;margin-top: 20px">
+                                                                         <p class="title">
+                                                                            <span class="aui-icon icon-error"></span>
+                                                                            <strong>Import Error!</strong>
+                                                                         </p>
+                                                                        <p>Please, select phase and test case type!</p>
+                                                                     </div>`)
+                        } else if (errors["phaseID"]) {
+                            $('#display-message-error').empty().append(`<div class="aui-message error" style="width: 50%;margin-top: 20px">
+                                                                         <p class="title">
+                                                                            <span class="aui-icon icon-error"></span>
+                                                                            <strong>Import Error!</strong>
+                                                                         </p>
+                                                                        <p>Please, select phase!</p>
+                                                                     </div>`)
+                        } else if (errors["testCaseType"]) {
+                            $('#display-message-error').empty().append(`<div class="aui-message error" style="width: 50%;margin-top: 20px">
+                                                                         <p class="title">
+                                                                            <span class="aui-icon icon-error"></span>
+                                                                            <strong>Import Error!</strong>
+                                                                         </p>
+                                                                        <p>Please, select test case type!</p>
+                                                                     </div>`)
+                        } else if (errors["errorService"]) {
+                            $('#display-message-error').empty().append(`<div class="aui-message error" style="width: 50%;margin-top: 20px">
+                                                                         <p class="title">
+                                                                            <span class="aui-icon icon-error"></span>
+                                                                            <strong>Import Error!</strong>
+                                                                         </p>
+                                                                        <p>${errorService}</p>
+                                                                     </div>`)
+                        } else {
+                            $('#display-message-error').empty().append(`<div class="aui-message error" style="width: 50%;margin-top: 20px">
+                                                                         <p class="title">
+                                                                            <span class="aui-icon icon-error"></span>
+                                                                            <strong>Import Error!</strong>
+                                                                         </p>
+                                                                        <p>Server Error, Try it!</p>
+                                                                     </div>`)
+                        }
+                    } else {
+                        $('#display-message-error').empty().append(`<div class="aui-message error" style="width: 50%;margin-top: 20px">
+                                                                         <p class="title">
+                                                                            <span class="aui-icon icon-error"></span>
+                                                                            <strong>Import Error!</strong>
+                                                                         </p>
+                                                                        <p>Server Error, Try it!</p>
+                                                                     </div>`)
+                    }
+                    $('.main-loading').css('display', 'none');
+                }
+            });
+        }
+
+        function onChangeImportType(seft) {
+            if (seft.value == 'Test Case') {
+                $('.test-case-type').css('display', 'block')
+            } else {
+                $('.test-case-type').css('display', 'none')
+            }
+            $('#display-message-error').empty();
+            isCheckDirty = true;
+        }
+
+        function onChangePhase() {
+            $('#display-message-error').empty();
+            isCheckDirty = true;
+        }
+
+        function onChangeTestCaseType() {
+            $('#display-message-error').empty();
+            isCheckDirty = true;
+        }
+    </script>
+</head>
+<body>
+<div class="magrinLeft20">
+    <!-- Begin header -->
+    <header class="aui-page-header aui-page-header-fixed header-with-border">
+        <div class="aui-page-header-inner">
+            <h1><span id="summary-subnav-title"><span class="subnavigator-title"
+                                                      title="$i18n.getText("import-test-case.label")">$i18n.getText(
+                "import-test-case.label")</span></span>
+            </h1>
+        </div><!-- .aui-page-header-inner --></header>
+    <!-- End header -->
+    <!-- Loading -->
+    <div class="main-loading" style="display: none">
+        <div class="wrap">
+            <div class="jira-page-loading-background"></div>
+            <div class="jira-page-loading-indicator"></div>
+        </div>
+    </div>
+    <!-- Loading -->
+    <div style="margin: 20px">
+        <div id="display-message-error">
+        </div><!-- .aui-message -->
+        <form class="my-form aui top-label" id="import-file" enctype="multipart/form-data">
+            <div id="drop-area" style="text-align: center">
+                <p>$i18n.getText("import-test-case.drag-drop.label")</p>
+                <p>Or</p>
+                <input type="file"
+                       accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroenabled.12"
+                       name="Select file" id="input-file" class="ignore-inline-attach" onchange="handleFiles(this.files)">
+                <label class="button" for="input-file">$i18n.getText("import-test-case.button-select-file.label")</label>
+            ##                <input type="file" name="Select file" id="input-file" class="ignore-inline-attach">
+            </div>
+            <div id="gallery" class="aui-group" style="width: 50%;display: none">
+                <div class="aui-item" style="width: 3%"><span class="aui-icon aui-icon-large aui-iconfont-file-xls"></span>
+                </div>
+                <div class="aui-item">
+                    <div class="aui-group">
+                        <div id="label-file" class="aui-item" style="float: left"></div>
+                        <div id="size-file" class="aui-item" style="float: right"></div>
+                    </div>
+                    <div id="some-id" class="aui-progress-indicator">
+                        <span id="value-progess-bar" class="aui-progress-indicator-value"></span>
+                    </div>
+                </div>
+                <div class="aui-item" style="position: relative;width: 5%">
+                    <div style="position: absolute;top: 5px">
+                        <span id="cancel-upload" class="aui-icon aui-icon-small aui-iconfont-close-dialog">Cancel upload</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="aui-group" style="width: 50%">
+
+                <div class="aui-item">
+                    <div class="field-group">
+                        <label for="select-example">$i18n.getText(
+                            "import-test-case.select-option-import-type.label")</label>
+                        <select class="select full-width-field" id="select-import-type"
+                                name="select-import-type" onchange="onChangeImportType(this)">
+                            <option>$i18n.getText("import-test-case.select-option-import-type.test-case")</option>
+                            <option>$i18n.getText("import-test-case.select-option-import-type.test-plan")</option>
+                            <option>$i18n.getText("import-test-case.select-option-import-type.test-result")</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="aui-item">
+                    <div class="field-group phase">
+                        <label for="select-example">$i18n.getText(
+                            "import-test-case.select-option-phase.label")</label>
+                        <select class="select full-width-field" id="select-phase"
+                                name="select-example" onchange="onChangePhase()">
+                            <option value="">$i18n.getText("import-test-case.select-option.value-none")</option>
+                            #foreach( $phase in $phases )
+                                <option value="$phase.getOptionId()">$phase.getValue()</option>
+                            #end
+                        </select>
+                    </div>
+                </div>
+                <div class="aui-item">
+                    <div class="field-group test-case-type">
+                        <label for="select-example">$i18n.getText(
+                            "import-test-case.select-option-test-case-type.label")</label>
+                        <select class="select full-width-field" id="select-test-case-type"
+                                name="select-example" onchange="onChangeTestCaseType()">
+                            <option value="">$i18n.getText(
+                                "import-test-case.select-option.value-none")</option>
+                            #foreach( $testcaseType in $testcaseTypes )
+                                <option value="$testcaseType.getOptionId()">$testcaseType.getValue()</option>
+                            #end
+                        </select>
+                    </div>
+                </div>
+                <div class="aui-item" style="width: 10%">
+                    <button type="button" id="btn-import-file" class="aui-button aui-button-primary" style="margin-top: 30px"
+                            onclick="submitImport($projectId)">$i18n.getText(
+                        "import-test-case.button-import-test-case.label")</button>
+                </div>
+            </div>
+        ##    <div id="attach-max-size" class="hidden">100000000000</div>
+        ##    <input type="hidden" id="id" name="id" value="1"/>
+            <input type="hidden" id="url-base" value="$base_url"/>
+        </form>
+        #set( $String = '' )
+        #set( $statusImport = "Importing")
+        <div style="width: 100%;margin-top: 15px">
+
+            <table class="aui">
+                <thead>
+                <tr>
+                    <th id="basic-number" style="width: 25%">$i18n.getText(
+                        "import-test-case.table-import-file")</th>
+                    <th id="basic-fname" style="width: 10%">$i18n.getText(
+                        "import-test-case.table-type")</th>
+                    <th id="basic-lname" style="width: 10%">$i18n.getText(
+                        "import-test-case.table-date")</th>
+                    <th id="basic-username" style="width: 25%">$i18n.getText(
+                        "import-test-case.table-invalid-file")</th>
+                #*<th id="basic-username" style="width: 30%">$i18n.getText(
+                    "import-test-case.progress")</th>*#
+                    <th id="basic-status" style="width: 10%">$i18n.getText(
+                        "import-test-case.status")</th>
+                    <th id="basic-message" style="width: 20%">$i18n.getText(
+                        "import-test-case.last.message")</th>
+                </tr>
+                </thead>
+
+                <tbody class="tblody">
+
+                    #foreach( $uploadFile in $listUploadFiles )
+                    <tr>
+                        #if($uploadFile.getUploadFileName())
+                            <td headers="basic-number" class="column25">$uploadFile.getUploadFileName()
+                                <span style="float: right">
+                        <a href="$base_url/plugins/servlet/uploadfileservlet?action=download&filename=$uploadFile.getPathFileValid()/$uploadFile.getUploadFileName()&pid=$projectId">$i18n.getText(
+                            "import-test-case.dowload")</a> #if ($uploadFile.getStatus() != $statusImport) | <a
+                                        href="$base_url/plugins/servlet/uploadfileservlet?action=remove&filename=$uploadFile.getPathFileValid()/$uploadFile.getUploadFileName()&pid=$projectId">$i18n.getText(
+                                    "import-test-case.remove")</a>
+                                #end</span>
+                            </td>
+                        #else
+                            <td headers="basic-number" class="column25"></td>
+                        #end
+                        <td headers="basic-fname" class="column10">$uploadFile.getType()</td>
+                        <td headers="basic-lname" class="column10">
+                            <time class="date" datetime="$uploadFile.getCreateDate()">
+                                $String.format('%1$tH:%1$tM:%1$tS %1$td/%1$tm/%1$tY', $uploadFile.getCreateDate())
+                            </time>
+                        </td>
+                        #if($uploadFile.getUploadFileNameInvalid())
+                            <td headers="basic-username" class="column25">$uploadFile.getUploadFileNameInvalid()
+                                <span style="float: right">
+                        <a href="$base_url/plugins/servlet/uploadfileservlet?action=download&filename=$uploadFile.getPathFileInvalid()&pid=$projectId">$i18n.getText(
+                            "import-test-case.dowload")</a> | <a
+                                        href="$base_url/plugins/servlet/uploadfileservlet?action=remove&filename=$uploadFile.getPathFileInvalid()&pid=$projectId">$i18n.getText(
+                                    "import-test-case.remove")</a></span>
+                            </td>
+                        #else
+                            <td headers="basic-username" class="column25"></td>
+                        #end
+                    #*#if($uploadFile.getProgress())
+                        <td headers="basic-fname">$uploadFile.getProgress()</td>
+                    #else
+                        <td headers="basic-number"></td>
+                    #end*#
+                        #if($uploadFile.getStatus())
+                            <td headers="basic-status" class="column10">$uploadFile.getStatus()</td>
+                        #else
+                            <td headers="basic-status" class="column10"></td>
+                        #end
+                        #if($uploadFile.getLastMessage()!='undefined')
+                            <td headers="basic-message" class="column20">$uploadFile.getLastMessage()</td>
+                        #else
+                            <td headers="basic-message" class="column20"></td>
+                        #end
+                    </tr>
+                    #end
+                </tbody>
+
+            </table>
+            #if($listUploadFiles&&$listUploadFiles.size()==0)
+                <div class="error_data">No Data Display!</div>
+            #end
+        </div>
+    </div>
+</div>
+</body>
+</html>

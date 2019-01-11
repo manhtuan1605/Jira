@@ -1,0 +1,905 @@
+<html>
+<head>
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-date-picker")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
+    $webResourceManager.requireResourcesForContext("jira-customize")
+    <style>
+        .table-no-data {
+            text-align: center !important;
+            font-size: 20px;
+            font-weight: bold;
+            color: gray;
+        }
+
+        .text-align-right {
+            text-align: right !important;
+        }
+
+        .monitor-item {
+            text-align: right;
+            padding: 0 10px;
+        }
+
+        .field-width-100 {
+            max-width: 100px !important;
+        }
+        .heading-monitor {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .body-monitor {
+            overflow: auto;
+            margin: 10px 0;
+            padding: 10px 0;
+        }
+
+        .tabble-summary td, .tabble-summary th {
+            border: 1px solid #ccc !important;
+        }
+
+        .background-yellow {
+            background-color: #ffff00;
+        }
+
+        .background-red {
+            background-color: #ff0000;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <input type="text" id="projectId" value="$project" hidden="hidden">
+    <input type="text" id="projectName" value="$projectName" hidden="hidden">
+    <input type="text" id="i-value" value="0" hidden="hidden">
+    <div class="heading-monitor">
+        <form class="aui aui-group">
+            <input type="hidden" id="selected-project" value="$project"/>
+            <div class="aui-item">
+                <aui-select id="team-select-chart" name="leader-chart" placeholder="Select a team leader">
+                    #if($role == "PM")
+                        <aui-option class="select-item" value="0">All</aui-option>
+                    #end
+                    #foreach($leader in $leaders)
+                        <aui-option class="select-item" value="$leader.id">$leader.displayName</aui-option>
+                    #end
+                </aui-select>
+            </div>
+            <div class="aui-item aui-item-first">
+                <select id="select2-example" style="width: 100%" multiple onchange="getValueSelect(this)">
+                    <option value="All Project">All Project</option>
+                    #foreach($assignee in $assignees)
+                        <option value="$assignee.username">$assignee.displayName</option>
+                    #end
+                </select>
+            </div>
+            <div class="aui-item" style="width: 10%">
+                <button id="monitor-today" type="button" class="aui-button aui-button-primary" style="float: right">Today
+                </button>
+            </div>
+            <div class="aui-item releases-add__date-start">
+                <label style="padding-right: 5px;" for="monitor-start-date">Start date:</label>
+                <input id="monitor-start-date" class="aui-date-picker text field-width-100" type="text"
+                       name="monitor-start-date"
+                       placeholder="Start date">
+                <a href="javascript:void(0)" id="trigger-start-date" title="Select a date">
+                    <span class="aui-icon aui-icon-small aui-iconfont-calendar">Select a date</span>
+                </a>
+                <div id="error-start-date" class="error-container error"></div>
+            </div>
+            <div class="aui-item releases-add__date-release">
+                <label style="padding-right: 5px;" for="monitor-end-date">End date:</label>
+                <input id="monitor-end-date" class="aui-date-picker text field-width-100" type="text" name="monitor-end-date"
+                       placeholder="End date">
+                </input>
+                <a href="javascript:void(0)" id="trigger-end-date" title="Select a date">
+                    <span class="aui-icon aui-icon-small aui-iconfont-calendar">Select a date</span>
+                </a>
+                <div id="error-end-date" class="error-container error"></div>
+            </div>
+
+            <input type="hidden" name="atl_token" value="$atl_token"/>
+        </form>
+        <div class="releases-add__confirm">
+            <button class="aui-button" type="button" id="monitor-export-link">Export</button>
+        </div>
+    </div>
+    <div class="aui-group">
+        <div class="aui-item testExecute">
+        </div>
+        <div class="aui-item defectSubmit">
+        </div>
+    </div>
+    <div class="aui-group">
+        <div class="aui-item QASubmit">
+        </div>
+        <div class="aui-item defectFixConfirmation">
+        </div>
+    </div>
+    <div class="aui-group">
+        <div class="aui-item defectAndQAFollowUp">
+        </div>
+        <div class="aui-item other">
+        </div>
+    </div>
+    <div colspan="8" class="table-no-data chart-no-data" style="display: none">
+        Please choose an assignee.
+    </div>
+    <form class="aui aui-group">
+        <div class="aui-item">
+            <aui-select id="team-select" name="leader" placeholder="Select a team leader">
+                #if($role == "PM")
+                    <aui-option class="select-item" value="0">All</aui-option>
+                #end
+                #foreach($leader in $leaders)
+                    <aui-option class="select-item" value="$leader.id">$leader.displayName</aui-option>
+                #end
+            </aui-select>
+        </div>
+    </form>
+    <div class="body-monitor">
+        <table class="aui tabble-summary">
+            <thead>
+            <tr>
+                <th rowspan="2" style="min-width: 200px">Project Team</th>
+                <th colspan="3">Test Execute</th>
+                <th colspan="3">Defect Submit</th>
+                <th colspan="3">Q&A Submit</th>
+                <th colspan="3">Defect fix confirmation</th>
+                <th colspan="3">Defect and Q&A follow up</th>
+                <th colspan="3">Other</th>
+            </tr>
+            <tr>
+                <th>Qty</th>
+                <th>Time(h)</th>
+                <th>Productivity</th>
+                <th>Qty</th>
+                <th>Time(h)</th>
+                <th>Productivity</th>
+                <th>Qty</th>
+                <th>Time(h)</th>
+                <th>Productivity</th>
+                <th>Qty</th>
+                <th>Time(h)</th>
+                <th>Productivity</th>
+                <th>Qty</th>
+                <th>Time(h)</th>
+                <th>Productivity</th>
+                <th>Qty</th>
+                <th>Time(h)</th>
+                <th>Productivity</th>
+            </tr>
+            </thead>
+            <tbody id="body-perform">
+                #if($monitors.size() > 0)
+                    #foreach($element in $monitors)
+                    <tr>
+                        <td>$element.member.displayName</td>
+                        #if( ${element.testExecute.enoughQuantity} )
+                            <td class="text-align-right background-red">$element.testExecute.quantity</td>
+                        #else
+                            <td class="text-align-right">$element.testExecute.quantity</td>
+                        #end
+                        <td class="text-align-right">$element.testExecute.time</td>
+                        #if( ${element.testExecute.enoughProductivity} )
+                            <td class="text-align-right background-yellow">$element.testExecute.productivity</td>
+                        #else
+                            <td class="text-align-right">$element.testExecute.productivity</td>
+                        #end
+                        <td class="text-align-right">$element.defectSubmit.quantity</td>
+                        <td class="text-align-right">$element.defectSubmit.time</td>
+                        <td class="text-align-right">$element.defectSubmit.productivity</td>
+                        <td class="text-align-right">$element.qaSubmit.quantity</td>
+                        <td class="text-align-right">$element.qaSubmit.time</td>
+                        <td class="text-align-right">$element.qaSubmit.productivity</td>
+                        <td class="text-align-right">$element.defectFix.quantity</td>
+                        <td class="text-align-right">$element.defectFix.time</td>
+                        <td class="text-align-right">$element.defectFix.productivity</td>
+                        <td class="text-align-right">$element.dfAndQaFollow.quantity</td>
+                        <td class="text-align-right">$element.dfAndQaFollow.time</td>
+                        <td class="text-align-right">$element.dfAndQaFollow.productivity</td>
+                        <td class="text-align-right">$element.other.quantity</td>
+                        <td class="text-align-right">$element.other.time</td>
+                        <td>$element.other.productivity</td>
+                    </tr>
+                    #end
+                #else
+                <tr>
+                    <td colspan="19" class="table-no-data">No member</td>
+                </tr>
+                #end
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Start Test Execute Detail-->
+<div style="padding-top: 20px;">
+    <div class="aui-group">
+        <div class="aui-item">
+            <form id="form-select-assignee" class="aui">
+                <div id="g-assignee">
+                    <aui-select id="g-assignee-select" name="assigneeId" placeholder="Select an assignee">
+                        #foreach($assignee in $assignees)
+                            <aui-option value="$assignee.id">$assignee.displayName</aui-option>
+                        #end
+                    </aui-select>
+                </div>
+            </form>
+        </div>
+    </div>
+    <table class="aui">
+        <thead>
+        <tr>
+            <th>No</th>
+            <th>Test case type</th>
+            <th>Definition</th>
+            <th>Value</th>
+            <th>Conversion rate</th>
+            <th>Number of test cases</th>
+            <th>Time (h)</th>
+            <th>Productivity</th>
+        </tr>
+        </thead>
+        <tbody id="test-execute-detail-table-body">
+        <tr>
+            <td colspan="8" class="table-no-data">Please choose an assignee.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+<!-- End Test Execute Detail-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.js"></script>
+<script type="text/javascript">
+    AJS.$("#select2-example").auiSelect2({
+        placeholder: "Please select assignee"
+    });
+    window.onbeforeunload = null;
+    $(document).ready(function () {
+        $('#select2-example').val('All Project').trigger('change');
+        $('#team-select-chart').val('0');
+        $('#select2-example').prop("disabled", true);
+        AJS.$('#team-select').val(AJS.$('#team-select .select-item:first-child').val());
+        AJS.$('#monitor-start-date').val(moment().format('DD/MM/YYYY'));
+        AJS.$('#monitor-end-date').val(moment().format('DD/MM/YYYY'));
+        AJS.$('#monitor-start-date').datePicker({'overrideBrowserDefault': true, 'dateFormat': 'dd/mm/yy'});
+        AJS.$('#monitor-end-date').datePicker({'overrideBrowserDefault': true, 'dateFormat': 'dd/mm/yy'});
+        AJS.$("#trigger-start-date").click(function () {
+            AJS.$('#monitor-start-date').click()
+        });
+        AJS.$("#trigger-end-date").click(function () {
+            AJS.$('#monitor-end-date').click()
+        });
+
+        AJS.$('#monitor-today').click(function () {
+            AJS.$('#monitor-start-date').val(moment().format('DD/MM/YYYY'));
+            AJS.$('#monitor-end-date').val(moment().format('DD/MM/YYYY'));
+            AJS.$('#error-start-date').empty();
+            AJS.$('#error-end-date').empty();
+            monitor();
+            getTestExecuteDetailFromServer();
+            if ($('#select2-example').val() != null) {
+                getValueSelect($('#select2-example'));
+            }
+        });
+
+        AJS.$('#team-select').change(function () {
+            $(`#test-execute-detail-table-body`).empty().append(`
+                <tr>
+                    <td colspan="8" class="table-no-data">Please choose an assignee.</td>
+                </tr>
+            `);
+            selectTeamMonitor();
+        });
+
+        AJS.$('#team-select-chart').change(function () {
+            let isAllProject = $('#team-select-chart').val();
+            if (isAllProject != 0) {
+                jQuery.ajax({
+                    url: "../plugins/servlet/testerperformance",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        userId: $('#team-select-chart').val(),
+                        projectId: $('#selected-project').val(),
+                        startDate: $('#monitor-start-date').val(),
+                        endDate: $('#monitor-end-date').val()
+                    },
+                    success: function (res) {
+                        var optionsChartArray = [];
+                        getAssigneeByTeamForChart(res);
+                        jQuery.each(res, function (index, monitorMember) {
+                            optionsChartArray.push(monitorMember.member.username);
+                        });
+                        $('#select2-example').val(optionsChartArray).trigger('change');
+                        $('#select2-example').prop("disabled", false);
+                    },
+                    error: function () {
+                    }
+                });
+            } else {
+                getAssigneeByTeamForChart(undefined, true);
+                $('#select2-example').val('All Project').trigger('change');
+                $('#select2-example').prop("disabled", true);
+            }
+        });
+
+        AJS.$('#monitor-start-date').change(function () {
+            var start = $('#monitor-start-date');
+            var startDate = moment(start.val(), 'DD/MM/YYYY');
+            if (startDate.isValid()) {
+                var endDate = moment(AJS.$('#monitor-end-date').val(), 'DD/MM/YYYY');
+                if (!startDate.isAfter(endDate)) {
+                    monitor();
+                    getTestExecuteDetailFromServer();
+                    if ($('#select2-example').val() != null) {
+                        getValueSelect($('#select2-example'));
+                    }
+                    AJS.$('#error-start-date').empty();
+                    AJS.$('#error-end-date').empty();
+                } else {
+                    AJS.$('#error-start-date').empty().append("Start date is before or equal end date");
+                }
+            } else {
+                $('#monitor-start-date').empty();
+            }
+        });
+
+        AJS.$('#monitor-end-date').change(function () {
+            var end = AJS.$('#monitor-end-date');
+            var endDate = moment(end.val(), 'DD/MM/YYYY');
+            if (endDate.isValid()) {
+                var startDate = moment(AJS.$('#monitor-start-date').val(), 'DD/MM/YYYY');
+                if (!endDate.isBefore(startDate)) {
+                    monitor();
+                    getTestExecuteDetailFromServer();
+                    if ($('#select2-example').val() != null) {
+                        getValueSelect($('#select2-example'));
+                    }
+                    AJS.$('#error-start-date').empty();
+                    AJS.$('#error-end-date').empty();
+                } else {
+                    AJS.$('#error-end-date').empty().append("End date is after or equal start date");
+                }
+            } else {
+                AJS.$('#monitor-end-date').empty();
+            }
+        });
+
+        var selectTeamMonitor = function () {
+            jQuery.ajax({
+                url: "../plugins/servlet/testerperformance",
+                type: "GET",
+                dataType: "json",
+                data: {
+                    userId: $('#team-select').val(),
+                    projectId: $('#selected-project').val(),
+                    startDate: $('#monitor-start-date').val(),
+                    endDate: $('#monitor-end-date').val()
+                },
+                success: function (res) {
+                    getAssigneeByTeam(res);
+                    fillDataToSummaryTable(res);
+                },
+                error: function () {
+                }
+            })
+        }
+        var monitor = function () {
+            jQuery.ajax({
+                url: "../plugins/servlet/testerperformance",
+                type: "GET",
+                dataType: "json",
+                data: {
+                    userId: $('#team-select').val(),
+                    projectId: $('#selected-project').val(),
+                    startDate: $('#monitor-start-date').val(),
+                    endDate: $('#monitor-end-date').val()
+                },
+                success: function (res) {
+                    fillDataToSummaryTable(res);
+                },
+                error: function () {
+                }
+            })
+        };
+
+        function fillDataToSummaryTable(res) {
+            $('#body-perform').html(function () {
+                var html = '';
+                if (res.length > 0) {
+                    res.forEach(function (monitor) {
+                        html += `<tr>
+                                    <td>${monitor.member.displayName}</td>
+                                    <td class="text-align-right ${ monitor.testExecute.enoughQuantity ? 'background-red' : ''}">${monitor.testExecute.quantity}</td>
+                                    <td class="text-align-right">${ monitor.testExecute.time == 0 ? '0.0' : monitor.testExecute.time}</td>
+                                    <td class="text-align-right ${ monitor.testExecute.enoughProductivity ? 'background-yellow' : ''}">${ monitor.testExecute.productivity == 0 ? '0.0' : monitor.testExecute.productivity}</td>
+                                    <td class="text-align-right">${monitor.defectSubmit.quantity}</td>
+                                    <td class="text-align-right">${ monitor.defectSubmit.time == 0 ? '0.0' : monitor.defectSubmit.time}</td>
+                                    <td class="text-align-right">${ monitor.defectSubmit.productivity == 0 ? '0.0' : monitor.defectSubmit.productivity}</td>
+                                    <td class="text-align-right">${monitor.qaSubmit.quantity}</td>
+                                    <td class="text-align-right">${ monitor.qaSubmit.time == 0 ? '0.0' : monitor.qaSubmit.time}</td>
+                                    <td class="text-align-right">${ monitor.qaSubmit.productivity == 0 ? '0.0' : monitor.qaSubmit.productivity}</td>
+                                    <td class="text-align-right">${monitor.defectFix.quantity}</td>
+                                    <td class="text-align-right">${ monitor.defectFix.time == 0 ? '0.0' : monitor.defectFix.time}</td>
+                                    <td class="text-align-right">${ monitor.defectFix.productivity == 0 ? '0.0' : monitor.defectFix.productivity}</td>
+                                    <td class="text-align-right">${monitor.dfAndQaFollow.quantity}</td>
+                                    <td class="text-align-right">${ monitor.dfAndQaFollow.time == 0 ? '0.0' : monitor.dfAndQaFollow.time}</td>
+                                    <td class="text-align-right">${ monitor.dfAndQaFollow.productivity == 0 ? '0.0' : monitor.dfAndQaFollow.productivity}</td>
+                                    <td class="text-align-right">${monitor.other.quantity}</td>
+                                    <td class="text-align-right">${ monitor.other.time == 0 ? '0.0' : monitor.other.time}</td>
+                                    <td>${monitor.other.productivity}</td>
+                                 </tr>`
+                    })
+
+                } else {
+                    html = '<tr><td colspan="19" class="table-no-data">No member</td></tr>';
+                }
+                return html;
+            });
+        }
+
+        // Get assignee when select team
+        function getAssigneeByTeam(monitorMembers) {
+            var options = "";
+            jQuery.each(monitorMembers, function (index, monitorMember) {
+                options = options + "<aui-option value=" + monitorMember.member.id + ">" + monitorMember.member.displayName + "</aui-option>"
+            })
+            $(`#g-assignee`).empty().html(`
+                <aui-select id="g-assignee-select" name="assigneeId" placeholder="Select an assignee">
+                    ${options}
+                </aui-select>
+            `)
+            handleTestExecuteDetail();
+        }
+
+        function getAssigneeByTeamForChart(monitorMembers, isAllProject = false) {
+            var optionsChart = '';
+            if (isAllProject) {
+                optionsChart = "<option value='All Project'>All Project</option>"
+            }
+            if (monitorMembers != undefined) {
+                jQuery.each(monitorMembers, function (index, monitorMember) {
+                    optionsChart = optionsChart + "<option value=" + monitorMember.member.username + ">" + monitorMember.member.displayName + "</option>"
+                })
+            }
+            $(`.assignee-chart .aui-item-first`).empty().html(`
+                <select id="select2-example" multiple onchange="getValueSelect(this)">
+                    ${optionsChart}
+                </select>
+            `);
+            AJS.$("#select2-example").auiSelect2({
+                placeholder: "Please select assignee"
+            });
+            $('.testExecute').empty()
+            $('.defectSubmit').empty();
+            $('.QASubmit').empty();
+            $('.defectFixConfirmation').empty();
+            $('.defectAndQAFollowUp').empty();
+            $('.other').empty();
+            $('.chart-no-data').css('display', 'block');
+        }
+
+        handleTestExecuteDetail();
+
+        AJS.$('#monitor-export-link').click(function () {
+            var userId = $('#team-select').val();
+            var projectId = $('#selected-project').val();
+            var start = $('#monitor-start-date').val();
+            var end = $('#monitor-end-date').val()
+            window.location.href = `../plugins/servlet/monitor-export?userId=${userId}&projectId=${projectId}&start=${start}&end=${end}`;
+        })
+    })
+
+    // Get Test Execute Detail when change Assignee
+    function handleTestExecuteDetail() {
+        AJS.$('#g-assignee-select').change(function () {
+            getTestExecuteDetailFromServer();
+        })
+    }
+
+    // Get Test Execute Detail from server
+    function getTestExecuteDetailFromServer() {
+        var assigneeId = AJS.$('#g-assignee-select').val();
+        if ("" != assigneeId) {
+            jQuery.ajax({
+                url: "../plugins/servlet/test-execute-detail",
+                type: "GET",
+                dataType: "json",
+                data: {
+                    projectId: AJS.$("#selected-project").val(),
+                    assigneeId: assigneeId,
+                    startDate: AJS.$('#monitor-start-date').val(),
+                    endDate: AJS.$('#monitor-end-date').val(),
+                },
+                success: function (data) {
+                    fillTestExecuteDetailTable(data);
+                },
+                error: function (err) {
+                    $(`#test-execute-detail-table-body`).empty();
+                    $(`#test-execute-detail-table-body`).append(`
+                    <tr>
+                        <td colspan="8" class="table-no-data">An error occurred. Please try again.</td>
+                    </tr>
+                `)
+                }
+            })
+        }
+    }
+
+    function fillTestExecuteDetailTable(testExecuteDetails) {
+        $(`#test-execute-detail-table-body`).empty();
+        if (testExecuteDetails.length == 0)
+            $(`#test-execute-detail-table-body`).append(`
+                    <tr>
+                        <td colspan="8" class="table-no-data">No data to display.</td>
+                    </tr>
+                `)
+        else {
+            var productivitySumary = 0;
+            var numberOfTestcaseType = 0;
+            jQuery.each(testExecuteDetails, function (index, testExecuteDetail) {
+                numberOfTestcaseType++;
+                if (testExecuteDetail.productivity !== undefined) {
+                    productivitySumary = productivitySumary + testExecuteDetail.productivity;
+                }
+                var definitionHtml = '';
+                jQuery.each(testExecuteDetail.definition, function (index, definition) {
+                    definitionHtml = definitionHtml + '<li>' + definition + '</li>';
+                })
+                var formattedConversionRate = parseFloat(testExecuteDetail.conversionRate).toFixed(1);
+                var formattedTime = parseFloat(testExecuteDetail.time).toFixed(2);
+                var formattedProductivity = testExecuteDetail.productivity === undefined ? 'N/A' : parseFloat(testExecuteDetail.productivity).toFixed(2);
+
+                $(`#test-execute-detail-table-body`).append(`
+                        <tr>
+                            <td>${testExecuteDetail.no}</td>
+                            <td>${testExecuteDetail.testCaseType}</td>
+                            <td>
+                                <ul>${definitionHtml}</ul>
+                            </td>
+                            <td>${testExecuteDetail.value}</td>
+                            <td>${formattedConversionRate}</td>
+                            <td>${testExecuteDetail.numberOfTestCases}</td>
+                            <td>${formattedTime}</td>
+                            <td>${formattedProductivity}</td>
+                        </tr>
+                    `)
+            });
+            var averageProductivity = parseFloat(productivitySumary / numberOfTestcaseType).toFixed(2);
+            $(`#test-execute-detail-table-body`).append(`
+                        <tr>
+                            <td colspan="7" style="font-weight: bold; text-align: center;">Average Productivity</td>
+                            <td>${averageProductivity}</td>
+                        </tr>
+                    `)
+        }
+    }
+
+    //chart
+    function getAllMemberTeam(arrySelect) {
+        jQuery.ajax({
+            url: "../plugins/servlet/monitor-export-chart?projectId=" + $('#projectId').val(),
+            type: "GET",
+            dataType: "json",
+            success: function (res) {
+                let startDate = $('#monitor-start-date').val();
+                let endDate = $('#monitor-end-date').val();
+                let arrSelectTostring = '';
+                res.allMember.concat(arrySelect);
+                res.allMember.map(x => {
+                    arrSelectTostring += `'${x}',`
+                })
+                assigee(res.allMember, $('#projectName').val(), arrSelectTostring.slice(0, arrSelectTostring.length - 1), moment(startDate, 'DD/MM/YYYY').format('YYYY-MM-DD'), moment(endDate, 'DD/MM/YYYY').format('YYYY-MM-DD'), true, res.QC.length);
+            }
+        })
+    }
+
+    function getValueSelect(value) {
+        let arrySelect = $(value).val();
+        let isAll;
+        if (arrySelect != undefined) {
+            isAll = arrySelect.find(x => x == 'All Project')
+        }
+        if (isAll != undefined && arrySelect.length > 1) {
+            var indexAllProject = arrySelect.indexOf("All Project");
+            arrySelect.splice(indexAllProject, 1);
+        }
+        if (isAll == undefined || isAll != undefined && arrySelect.length > 1) {
+            if (arrySelect != null) {
+                let arrSelectTostring = '';
+                arrySelect.map(x => {
+                    arrSelectTostring += `'${x}',`
+                })
+                let startDate = $('#monitor-start-date').val();
+                let endDate = $('#monitor-end-date').val();
+                assigee($(value).val(), $('#projectName').val(), arrSelectTostring.slice(0, arrSelectTostring.length - 1), moment(startDate, 'DD/MM/YYYY').format('YYYY-MM-DD'), moment(endDate, 'DD/MM/YYYY').format('YYYY-MM-DD'));
+            } else {
+                //To Do
+                $('.testExecute').empty()
+                $('.defectSubmit').empty();
+                $('.QASubmit').empty();
+                $('.defectFixConfirmation').empty();
+                $('.defectAndQAFollowUp').empty();
+                $('.other').empty();
+                $('.chart-no-data').css('display', 'block');
+            }
+        }
+        if (isAll != undefined) {
+            getAllMemberTeam(arrySelect);
+        }
+
+    }
+
+    function assigee(worklogAuthor, projectName, arrSelectTostring, startDate, endDate, allProject = false, sumOfMemberQC) {
+        getCustomfieldIdByName('Type Of Work').then(customfieldId => {
+            getIssueTask(customfieldId, worklogAuthor, projectName, arrSelectTostring, startDate, endDate, allProject, sumOfMemberQC);
+        })
+
+        getTestExecuteChart(worklogAuthor, arrSelectTostring, startDate, endDate, allProject, sumOfMemberQC);
+    }
+
+    function getLabels(startDate, endDate) {
+        let data = [];
+        let date = moment(endDate).diff(moment(startDate), 'days')
+        if (date != 0) {
+            for (let i = 0; i <= date; i++) {
+                data.push(moment(startDate).add(i, 'd').format('DD-MM-YYYY'))
+            }
+        } else {
+            for (let i = 8; i <= 18; i++) {
+                data.push(moment(startDate).add(i, 'hours').hours())
+            }
+        }
+        return data;
+    }
+
+    function getCustomfieldIdByName(name) {
+        let promise = new Promise((resolve, reject) => jQuery.ajax({
+            url: "../plugins/servlet/testerperformance?customfieldName=" + name,
+            type: "POST",
+            dataType: "json",
+            success: function (res) {
+                resolve(res);
+            }
+        }))
+        return promise;
+    }
+
+    function getIssueTask(customfieldTypeOfWork, worklogAuthor, projectName, arrSelectTostring, startDate, endDate, allProject, sumOfMemberQC) {
+        let data = {defectSubmit: [], QASubmit: [], defectFixConfirmation: [], defectAndQAFollowUp: [], other: []}
+        let promise = new Promise((resolve, reject) => jQuery.ajax({
+            url: "../rest/api/2/search?jql='worklogAuthor' in (" + arrSelectTostring + ") AND 'worklogDate' >= '" + startDate + "' AND 'worklogDate' <= '" + endDate + "' AND 'project'='" + projectName + "'&maxResults=10000",
+            type: "GET",
+            dataType: "json",
+            success: function (res) {
+                res.issues.map(item => {
+                    switch (item.fields[customfieldTypeOfWork].value) {
+                        case 'Defect submit':
+                            data.defectSubmit.push(item);
+                            break;
+                        case 'Q&A Submit':
+                            data.QASubmit.push(item);
+                            break;
+                        case 'Defect fix confirmation':
+                            data.defectFixConfirmation.push(item);
+                            break;
+                        case 'Defect and Q&A follow up':
+                            data.defectAndQAFollowUp.push(item);
+                            break;
+                        case 'Other':
+                            data.other.push(item);
+                            break;
+                    }
+                })
+                addHtml(data, 'Task')
+                resolve(data)
+            }
+        }))
+        promise.then(x => {
+            let dateDiff = moment(endDate).diff(moment(startDate), 'days');
+            let dateLabels = getLabels(startDate, endDate);
+            formatDataChart(x.defectSubmit, dateLabels, worklogAuthor, 'defectSubmit', 'Defect submit', dateDiff, allProject, sumOfMemberQC)
+            formatDataChart(x.QASubmit, dateLabels, worklogAuthor, 'QASubmit', 'Q&A Submit', dateDiff, allProject, sumOfMemberQC)
+            formatDataChart(x.defectFixConfirmation, dateLabels, worklogAuthor, 'defectFixConfirmation', 'Defect fix confirmation', dateDiff, allProject, sumOfMemberQC)
+            formatDataChart(x.defectAndQAFollowUp, dateLabels, worklogAuthor, 'defectAndQAFollowUp', 'Defect and Q&A follow up', dateDiff, allProject, sumOfMemberQC)
+            formatDataChart(x.other, dateLabels, worklogAuthor, 'other', 'Other', dateDiff, allProject, sumOfMemberQC)
+        })
+    }
+
+    function formatDataChart(data, label, worklogAuthor, chartId, titleChart, dateDiff, allProject, sumOfMemberQC) {
+        let dataConcat = [];
+        let i = 0;
+        let dataSetupChar = [];
+        if (!allProject) {
+            worklogAuthor.map(item => {
+                dataSetupChar.push({
+                    label: item,
+                    data: [],
+                    borderWidth: 1,
+                    borderColor: getRandomColor(),
+                    backgroundColor: 'rgba(0, 0, 0, 0.0)'
+                })
+            })
+        } else {
+            dataSetupChar.push({
+                label: 'All Project',
+                data: [],
+                borderWidth: 1,
+                borderColor: getRandomColor(),
+                backgroundColor: 'rgba(0, 0, 0, 0.0)'
+            })
+        }
+        var promise = new Promise((resolve, reject) => {
+                    if (data.length == 0) {
+                        resolve(dataConcat)
+                    } else {
+                        data.map((x, index) => {
+                            jQuery.ajax({
+                                url: "../rest/api/2/issue/" + x.id + "/worklog",
+                                type: "GET",
+                                contentType: 'application/json; charset=utf-8',
+                                dataType: "json",
+                                async: false,
+                                success: function (res) {
+                                    worklogAuthor.map(x => {
+                                                if (res.worklogs.find(find => find.author.name === x) != undefined) {
+                                                    dataConcat = dataConcat.concat(res.worklogs.filter(find => find.author.name === x))
+                                                }
+                                            }
+                                    )
+                                    if (index + 1 === data.length) {
+                                        resolve(dataConcat)
+                                    }
+                                }
+                            });
+                        })
+                    }
+                }
+        )
+        promise.then(x => {
+            let arrauWorkLog = groupBy(x, 'started', 'author', 'timeSpentSeconds', undefined, dateDiff, allProject)
+            setupChart(chartId, getDataByLabel(label, arrauWorkLog, dataSetupChar, allProject, false, sumOfMemberQC), label, titleChart)
+        })
+    }
+
+    function groupBy(objectArray, property, author, timeSpent, fields, dateDiff, allProject) {
+        return objectArray.reduce(function (acc, obj) {
+            let key = dateDiff == 0 ? moment(obj[property]).hours() : moment(obj[property]).format('DD-MM-YYYY');
+            if (!allProject) {
+                var key2 = fields == undefined ? obj[author].name : obj[fields][author].name;
+            }
+            if (!acc[key]) {
+                acc[key] = allProject ? 0 : {[key2]: 0};
+            } else if (!acc[key][key2] && !allProject) {
+                acc[key] = {...acc[key], [key2]: 0}
+            }
+            if (!allProject) {
+                acc[key][key2] += fields == undefined ? obj[timeSpent] : obj[fields][timeSpent];
+            } else {
+                acc[key] += fields == undefined ? obj[timeSpent] : obj[fields][timeSpent]
+            }
+            return acc;
+        }, {});
+    }
+
+    function setupChart(htmlId, dataSet, labels, titleChart) {
+        let options = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: dataSet
+            },
+            options: {
+                responsive: true,
+                elements: {
+                    line: {
+                        tension: 0,
+                    }
+                },
+                title: {
+                    display: true,
+                    text: titleChart
+                }
+            }
+        }
+        let ctx = document.getElementById(htmlId).getContext('2d');
+        new Chart(ctx, options);
+    }
+
+    function random_rgba() {
+        let o = Math.round, r = Math.random, s = 255;
+        k = (Math.random() * 0.5) + 0.1;
+        return 'rgba(' + o(r() * s) + ',' + o(r() * s) + ',' + o(r() * s) + ',' + k.toFixed(1) + ')';
+    }
+
+    function getRandomColor() {
+        let letters = '0123456789ABCDEF';
+        let color = '#';
+        for (let i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    function getDataByLabel(label, arrauWorkLog, dataSetupChar, allProject, isTestExcuse = false, sumOfMemberQC) {
+        label.map((x, index) => {
+            dataSetupChar.map(item => item.data.push(0));
+            if (arrauWorkLog[x] != undefined) {
+                if (!allProject) {
+                    Object.keys(arrauWorkLog[x]).map(key => {
+                        let objFind = dataSetupChar.find(fruit => fruit.label === key);
+                        objFind.data[index] = isTestExcuse ? arrauWorkLog[x][key] : (arrauWorkLog[x][key] / 60);
+                        dataSetupChar.splice(dataSetupChar.indexOf(objFind), 1);
+                        dataSetupChar.map(item => item.data.push(0))
+                        dataSetupChar.push(objFind);
+                    })
+                } else {
+                    dataSetupChar[0].data[index] = (isTestExcuse ? arrauWorkLog[x] : arrauWorkLog[x] / 60) / sumOfMemberQC;
+                }
+            }
+        })
+        return dataSetupChar;
+    }
+
+    function addHtml(data, condition) {
+        if (condition === 'Task') {
+            $('.defectSubmit').append('<canvas id="defectSubmit"></canvas>')
+            $('.QASubmit').append('<canvas id="QASubmit"></canvas>')
+            $('.defectFixConfirmation').append('<canvas id="defectFixConfirmation"></canvas>')
+            $('.defectAndQAFollowUp').append('<canvas id="defectAndQAFollowUp"></canvas>')
+            $('.other').append('<canvas id="other"></canvas>')
+            $('.chart-no-data').css('display', 'none');
+        } else {
+            $('.testExecute').append('<canvas id="testExecute"></canvas>')
+            $('.chart-no-data').css('display', 'none');
+        }
+    }
+
+    function getTestExecuteChart(updateAuthor, assignees, startDate, endDate, allProject, sumOfMemberQC) {
+        let dataSetupCharTextExcute = [];
+        if (!allProject) {
+            updateAuthor.map(item => {
+                dataSetupCharTextExcute.push({
+                    label: item,
+                    data: [],
+                    borderWidth: 1,
+                    borderColor: getRandomColor(),
+                    backgroundColor: 'rgba(0, 0, 0, 0.0)'
+                })
+            })
+        } else {
+            dataSetupCharTextExcute.push({
+                label: 'All Project',
+                data: [],
+                borderWidth: 1,
+                borderColor: getRandomColor(),
+                backgroundColor: 'rgba(0, 0, 0, 0.0)'
+            })
+        }
+        let dateDiffTestCase = moment(endDate).diff(moment(startDate), 'days');
+        jQuery.ajax({
+            url: "../plugins/servlet/test-execute-chart",
+            type: "POST",
+            dataType: "json",
+            data: {
+                projectId: AJS.$("#selected-project").val(),
+                usernames: assignees,
+                startDate: AJS.$('#monitor-start-date').val(),
+                endDate: AJS.$('#monitor-end-date').val(),
+            },
+            success: function (data) {
+                let dateLabelsTestExcute = getLabels(startDate, endDate);
+                let arrayTestDuration = groupBy(data, 'executeTime', 'assignee', 'productivity', undefined, dateDiffTestCase, allProject)
+                addHtml(null, 'testCase');
+                setupChart('testExecute', getDataByLabel(dateLabelsTestExcute, arrayTestDuration, dataSetupCharTextExcute, allProject, true, sumOfMemberQC), dateLabelsTestExcute, 'Test execute');
+            },
+            error: function (err) {
+            }
+        })
+    }
+</script>
+</body>
+</html>

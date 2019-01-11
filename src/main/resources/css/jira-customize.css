@@ -1,0 +1,17 @@
+div.divGroup .divName {
+    font-size: 15px;
+    line-height: normal;
+    padding: 2px 5px 2px 0;
+    word-break: break-word;
+    word-wrap: break-word;
+    color: #707070
+}
+ .divValue {
+    font-size: 15px;
+    line-height: normal;
+    word-break: break-word;
+    word-wrap: break-word;
+}
+ #notgood-pending-dialog {
+     width: 810px !important;
+ }

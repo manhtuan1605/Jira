@@ -1,0 +1,186 @@
+{
+  "issue-type-scheme": {
+    "name": "environment.project.template.issuetype.scheme.name",
+    "description": "environment.project.template.issuetype.scheme.description",
+    "issue-types": [
+      {
+        "key": "huDevice",
+        "name": "Hu Device",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme": "huDeviceDefaultScreenScheme"
+      },
+      {
+        "key": "screenDevice",
+        "name": "Screen Device",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme": "screenDeviceDefaultScreenScheme"
+      },
+      {
+        "key": "huTypeVehicle",
+        "name": "Hu Type Vehicle",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme": "huTypeVehicleDefaultScreenScheme"
+      },
+      {
+        "key": "siSysInfo",
+        "name": "Si Sys Info",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme": "siSysInfoDefaultScreenScheme"
+      },
+      {
+        "key": "siAmigoInfo",
+        "name": "Si Amigo Info",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme": "siAmigoInfoDefaultScreenScheme"
+      },
+      {
+        "key": "setOfDevice",
+        "name": "Set Of Device",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme": "setOfDeviceDefaultScreenScheme",
+        "workflow": "wf9"
+      }
+    ]
+  },
+  "workflow-scheme": {
+    "name": "test.project.template.workflow.scheme.name",
+    "description": "test.project.template.workflow.scheme.description",
+    "default-workflow": "wf9",
+    "workflows": [
+      {
+        "key": "wf9",
+        "name": "test.project.template.workflow.wf3.name",
+        "workflow-bundle": "/wfb/Env-Project.jwb"
+      }
+    ]
+  },
+  "issue-type-screen-scheme": {
+    "name": "Environment Project Issue Type Screen Scheme",
+    "description": "Environment Project",
+    "default-screen-scheme": "huDeviceDefaultScreenScheme",
+    "screen-schemes": [
+      {
+        "key": "huDeviceDefaultScreenScheme",
+        "name": "Hu Device Management Screen Scheme",
+        "default-screen": "huDeviceDefaultScreen"
+      },
+      {
+        "key": "screenDeviceDefaultScreenScheme",
+        "name": "Screen Device Management Screen Scheme",
+        "default-screen": "screenDeviceDefaultScreen"
+      },
+      {
+        "key": "huTypeVehicleDefaultScreenScheme",
+        "name": "Hu Type Vehicle Management Screen Scheme",
+        "default-screen": "huTypeVehicleDefaultScreen"
+      },
+      {
+        "key": "siSysInfoDefaultScreenScheme",
+        "name": "SI Sys Info Management Screen Schema",
+        "default-screen": "siSysInfoDefaultScreen"
+      },
+      {
+        "key": "siAmigoInfoDefaultScreenScheme",
+        "name": "SI Amigo Info Management Screen Schema",
+        "default-screen": "siAmigoInfoDefaultScreen"
+      },
+      {
+        "key": "setOfDeviceDefaultScreenScheme",
+        "name": "Set Of Device Management Screen Schema",
+        "default-screen": "setOfDeviceDefaultScreen",
+        "create-screen": "setOfDeviceCreateScreen",
+        "edit-screen": "setOfDeviceEditScreen"
+      }
+    ],
+    "screens": [
+      {
+        "key": "huDeviceDefaultScreen",
+        "name": "HuDevice Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": [
+              "assignee"
+            ]
+          }
+        ]
+      },
+      {
+        "key": "screenDeviceDefaultScreen",
+        "name": "Screen Device Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "huTypeVehicleDefaultScreen",
+        "name": "Hu Type Vehicle Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "siSysInfoDefaultScreen",
+        "name": "Si Sys Info Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "siAmigoInfoDefaultScreen",
+        "name": "Si Amigo Info Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "setOfDeviceDefaultScreen",
+        "name": "Set Of Device Info Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "setOfDeviceCreateScreen",
+        "name": "Set Of Device Create Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      },
+      {
+        "key": "setOfDeviceEditScreen",
+        "name": "Set Of Device Edit Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields": []
+          }
+        ]
+      }
+    ]
+  }
+}

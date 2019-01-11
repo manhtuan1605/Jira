@@ -1,0 +1,28 @@
+{namespace JIRA.Templates.ProjectTemplates.JiraCustomize}
+/**
+* Render the information page for My Project Template.
+*/
+{template .renderEnvironmentProjectTemplateExplanation}
+     <div class="dialog-page-body template-info">
+         <div class="dialog-panel-body pt-content" style="height: 241px; display: block;">
+             <div>
+                 <div class="top-panel">
+                     <p>{getText('environment.project.template.info.page.description')}</p>
+                 </div>
+                 <div class="left-panel">
+                    <h6>Issue Types</h6>
+                       <ul class="project-template-issuetype-list">
+                          <li><span class="issuetype-list-label"><span class="issuetype-icon task"></span><span class="issuetype-name">Hu Device</span></span></li>
+                          <li><span class="issuetype-list-label"><span class="issuetype-icon task"></span><span class="issuetype-name">Screen Device</span></span></li>
+                          <li><span class="issuetype-list-label"><span class="issuetype-icon task"></span><span class="issuetype-name">Si Amigo Info</span></span></li>
+                          <li><span class="issuetype-list-label"><span class="issuetype-icon task"></span><span class="issuetype-name">Si Sys Info</span></span></li>
+                          <li><span class="issuetype-list-label"><span class="issuetype-icon task"></span><span class="issuetype-name">Hu Type Vehicle</span></span></li>
+                          <li><span class="issuetype-list-label"><span class="issuetype-icon task"></span><span class="issuetype-name">Set Of Device</span></span></li>
+                       </ul>
+                 </div>
+                 <div class="right-panel">
+                 </div>
+             </div>
+         </div>
+     </div>
+{/template}

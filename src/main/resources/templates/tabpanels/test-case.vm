@@ -1,0 +1,350 @@
+$webResourceManager.requireResource("atlassian.plugin.key:jira-customize-resources")
+$webResourceManager.requireResourcesForContext("com.cmcglobal.plugins.jira.tabpanels.TestCase.jira-customize-resources")
+<html>
+<head>
+    <meta name="decorator" content="atl.admin">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+</head>
+<body>
+<div id="component" class="componentDiv">
+#if (!$testCase)
+    <div align="center" style="padding-top: 10px">
+        <h3 align="center" style="color: #cccccc">$i18n.getText("test-case.no-content")</h3>
+    </div>
+    #else
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.file-name")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getFileName())
+            #else
+                $testCase.getFileName()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.test-no")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getTestcaseNo())
+            #else
+                $testCase.getTestcaseNo()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.inter-ver")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getIntegratedVersion())
+            #else
+                $testCase.getIntegratedVersion()
+            #end
+##            <input style="border:none" type="text" onload="emptyValue($testCase.getIntegratedVersion())" readonly/>
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.test-id")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getTestcaseId())
+            #else
+                $testCase.getTestcaseId()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.test-desg-item")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getTestDesignItem())
+            #else
+                $testCase.getTestDesignItem()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.test-rank")</div>
+        <div class="col-md-8 divValue"">
+            #if (!$testCase.getTestRank())
+            #else
+                $testCase.getTestRank()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.test-type")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getTestType())
+            #else
+                $testCase.getTestType()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.evalue-target1")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getEvaluationTarget1())
+            #else
+                $testCase.getEvaluationTarget1()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.evalue-target2")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getEvaluationTarget2())
+                    #else
+                $testCase.getEvaluationTarget2()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.evalue-target3")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getEvaluationTarget3())
+            #else
+                $testCase.getEvaluationTarget3()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.evalue-target4")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getEvaluationTarget4())
+            #else
+                $testCase.getEvaluationTarget4()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.evalue-target5")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getEvaluationTarget5())
+            #else
+                $testCase.getEvaluationTarget5()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.purpose")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getPurpose())
+            #else
+                $testCase.getPurpose()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.precondition")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getPrecondition())
+            #else
+                $testCase.getPrecondition()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.steps")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getSteps())
+            #else
+                $testCase.getSteps()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.confm-disp")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getConfirmationDisplay())
+            #else
+                $testCase.getConfirmationDisplay()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.confm-au")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getConfirmationAudio())
+            #else
+                $testCase.getConfirmationAudio()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.pseudo-envi")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getPseudoEnvironment())
+            #else
+                $testCase.getPseudoEnvironment()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.sys-envi")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getSystemEnvironment())
+            #else
+                $testCase.getSystemEnvironment()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.user-envi")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getUserEnvironment())
+            #else
+                $testCase.getUserEnvironment()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.test-data")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getTestData())
+            #else
+                $testCase.getTestData()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.vehicle")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getVehicle())
+            #else
+                $testCase.getVehicle()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.destination")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getDestination())
+            #else
+                $testCase.getDestination()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.unit")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getUnit())
+            #else
+                $testCase.getUnit()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.test-company")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getTestCompany())
+            #else
+                $testCase.getTestCompany()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.remark")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getRemark())
+            #else
+                $testCase.getRemark()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.test-ver")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getTestCaseVersion())
+            #else
+                $testCase.getTestCaseVersion()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.update-date")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getUpdateDate())
+            #else
+                $testCase.getUpdateDate()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.creator-comp")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getCreatorCompany())
+            #else
+                $testCase.getCreatorCompany()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.creator-per")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getCreatorPerson())
+            #else
+                $testCase.getCreatorPerson()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.change-indicator")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getChangeIndicator())
+            #else
+                $testCase.getChangeIndicator()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.re-impl-flag")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getReimplementationFlag())
+            #else
+                $testCase.getReimplementationFlag()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.create-date")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getCreatedDate())
+            #else
+                $testCase.getCreatedDate()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.reason-change")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getReasonForChange())
+            #else
+                $testCase.getReasonForChange()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-case.release-ver-num")</div>
+        <div class="col-md-8 divValue">
+            #if (!$testCase.getReleaseVersionNumber())
+            #else
+                $testCase.getReleaseVersionNumber()
+            #end
+        </div>
+    </div>
+</div>
+#end
+</body>
+</html>

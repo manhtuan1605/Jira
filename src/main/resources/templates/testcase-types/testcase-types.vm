@@ -1,0 +1,426 @@
+<html>
+<head>
+    <title>$i18n.getText("testcase-type-nav-item.label")</title>
+
+    <meta name="decorator" content="admin"/>
+    <meta name="projectId" content="$selectedProject.id"/>
+    <meta name="projectKey" content="$selectedProject.key"/>
+    <meta name="admin.active.tab" content="testcase-type-nav-item-link"/>
+    <meta name="admin.active.section" content="atl.jira.proj.config"/>
+
+    $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-date-picker")
+    $webResourceManager.requireResourcesForContext("jira-customize")
+
+    <style>
+        #releases-add__version .releases-add__name {
+            width: 40%;
+        }
+
+        .versions-table .versions-table__name {
+            min-width: 100px;
+            width: 40.5%;
+        }
+
+        .versions-table .versions-table__date {
+            white-space: nowrap;
+            width: 20.5%;
+        }
+
+        .aui-datepicker-dialog {
+            z-index: 4000;
+        }
+    </style>
+
+    <script language="javascript" type="text/javascript">
+        function formatHtml( html ) {
+            return html.replace(/</g, "&lt;").replace(/>/g, "&gt;");;
+        }
+        window.onbeforeunload = function(e) {
+            e = e || window.event;
+            if (isDirty(document.forms["releases-add__version"]) || isDirty(document.forms["editTypeForm"])) {
+                // For IE and Firefox
+                if (e) {
+                    e.returnValue = "You have unsaved changes.";
+                }
+                // For Safari
+                return "You have unsaved changes.";
+            }
+        };
+        // Check form dirty
+        function isDirty(form) {
+            for (var i = 0; i < form.elements.length; i++) {
+                var element = form.elements[i];
+                var type = element.type;
+                if (type == "checkbox" || type == "radio") {
+                    if (element.checked != element.defaultChecked) {
+                        return true;
+                    }
+                }
+                else if (type == "hidden" || type == "password" ||
+                        type == "text" || type == "textarea") {
+                    if (element.value != element.defaultValue) {
+                        return true;
+                    }
+                }
+                else if (type == "select-one" || type == "select-multiple") {
+                    for (var j = 0; j < element.options.length; j++) {
+                        if (element.options[j].selected !=
+                                element.options[j].defaultSelected) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+        function editType(typeId) {
+            // get content of dialog
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/TestCaseTypesAction!getCurrentType.jspa?pid=$selectedProject.id&typeId=" + typeId,
+                success: function (data) {
+                    createDialogEditType(data, null);
+                },
+                error: function (errors) {
+                    displayError(typeId);
+                }
+            });
+
+        };
+        // dialog edit
+        function createDialogEditType(data, error) {
+            // Note this is a small dialog, so it fits in the Sandbox panel
+            // Standard sizes are 400, 600 and 840 pixels wide
+            var dialog = new AJS.Dialog({
+                width: 540,
+                height: 330,
+                id: "dialog-edit",
+                closeOnOutsideClick: false
+            });
+            // adds header for second page
+            dialog.addHeader('Edit');
+
+            // adds a single panel on second page (as there is only one panel, no menu will appear on the left side)
+            dialog.addPanel("SinglePanel", ` <form class="aui" id="editTypeForm" >
+                    <div id="errorID"></div>
+                    <input class="text" type="text" name="typeId" value="${data.ID}" style="display: none;">
+                    <div class="field-group">
+                        <label for="typeName">Type Name<span class="aui-icon icon-required"> required</span></label>
+                        <input class="text" type="text" id="type-name" name="typeName" title="first name" maxlength="100">
+                        <div id="errorTypeName" class="error"></div>
+                    </div>
+                    <div class="field-group">
+                        <label for="d-fname">Performance</label>
+                        <input class="text" type="text" id="type-performance" name="typePerformance" placeholder="Performance (Integer only)."
+                               autocomplete="off" value="${data.performance}">
+                        <div id="errorTypePerformance" style="white-space: pre-wrap" class="error"></div>
+                    </div>
+                </form>`, "SinglePanel");
+            $("#editTypeForm #type-name").val(data.testCaseTypeName);
+            editTypeFormData = $('#editTypeForm').serialize();
+            // add "Previous" button to page 1
+            dialog.addButton("Save", function (dialog) {
+                var dataSend = $('#editTypeForm').serialize();
+                doUpdate(dataSend, data, dialog)
+            });
+            // adds "Cancel" button to page 1
+            dialog.addLink("Cancel", function (dialog) {
+                if (editTypeFormData !== $('#editTypeForm').serialize()) {
+                    if (confirm("The change will not be save!")) {
+                        dialog.hide();
+                        dialog.remove();
+                    }
+                }
+                else {
+                    dialog.hide();
+                    dialog.remove();
+                }
+
+            }, "#");
+            dialog.show();
+        }
+
+        function doUpdate(editTypeFormData, data, dialog) {
+
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/TestCaseTypesAction!edit.jspa?pid=$selectedProject.id",
+                data: editTypeFormData,
+                success: function (data) {
+                    formatedString = formatHtml(data.testCaseTypeName);
+                    var startDate = "";
+                    if (data.startDate)
+                        startDate = moment(data.startDate).format('DD/MM/YYYY');
+                    var endDate = "";
+                    if (data.endDate)
+                        endDate = moment(data.endDate).format('DD/MM/YYYY');
+                    var template = `<td>
+                                        <div style="white-space:pre" id="typeName${data.ID}">${formatedString}</div>
+                                    </td>
+                                    <td class="versions-table__date_release">
+                                        <div>
+                                                ${data.performance}
+                                        </div>
+                                    </td>
+                                    <td class="dynamic-table__actions">
+                                        <div id="${data.ID}">
+
+                                        </div>
+                                    </td>`;
+                    $("tr[data-version-id='" + data.ID + "']").empty().append(template);
+                    var editSuccess = `<div class="operation-success"><span class="aui-icon aui-icon-small aui-iconfont-approve"></span></div>`
+                    $(`#${data.ID}`).empty().append(editSuccess);
+                    $("tr[data-version-id='" + data.ID + "']").removeClass("item-state-ready").addClass("item-state-successful")
+                    setTimeout(function () {
+                        timeOut(data);
+                    }, 1500);
+                    dialog.hide();
+                    dialog.remove();
+                },
+                error: function (errors) {
+
+                    var errors = JSON.parse(errors.responseText);
+                    if (errors.hasOwnProperty("typeId")) {
+                        idType = $('input[name="typeId"]').val();
+                        $("#errorID").empty().append('<div class="aui-message aui-message-error error">Could not find type has id : ' + idType + '</div>');
+                        $("#errorTypeName").empty();
+                        $("#errorTypePerformance").empty();
+                    } else {
+                        $("#errorTypeName").empty().append(errors["typeName"]);
+                        $("#errorTypePerformance").empty().append(errors["typePerformance"]);
+                    }
+                }
+            });
+        }
+
+        // time out
+        function timeOut(data) {
+            var actionHtml = `<a href="#version-actions-${data.ID}" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-${data.ID}"
+                                               aria-expanded="false">
+                                               <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                             </a>
+                                            <div id="version-actions-${data.ID}"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editType(${data.ID})">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>`
+            $("tr[data-version-id='" + data.ID + "']").removeClass("item-state-successful").addClass("item-state-ready");
+            $(`#${data.ID}`).empty().append(actionHtml);
+        }
+
+        // display error
+        function displayError(typeId) {
+            $("tr[data-version-id='" + typeId + "']").css("background-color", "rgba(208,68,55,0.1)");
+            var htmlError = `<div>
+                                            <div class="operation-retry operation-delete">
+                                                <div><span class="aui-icon aui-icon-small aui-iconfont-info" title="This type already deleted!"></span>
+                                                <a href="javascript:void(0)" class="operation-retry">Retry</a>
+                                                <a href="#" tabindex="0" id="cancel"
+                                                        class="aui-icon aui-icon-small aui-iconfont-remove operation-discard"
+                                                        title="Discard !" onclick="cancel(${typeId})">Discard</a>
+                                                        </div>
+                                            </div>
+                                        </div>`
+            $(`#${typeId}`).empty().append(htmlError);
+        }
+
+        // cancel
+        function cancel(value) {
+            var htmlEditDelete = `<a href="#version-actions-${value}" aria-haspopup="true"
+                                                class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                                resolved="" aria-controls="version-actions-${value}"
+                                                aria-expanded="false">
+                                                 <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                             </a>
+                                             <div id="version-actions-${value}"
+                                                  class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                  resolved=""
+                                                  aria-hidden="true">
+                                                 <ul class="aui-list-truncate">
+                                                      <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editType(${value})">Edit</a>
+                                                      </li>
+                                                 </ul>
+                                             </div>`
+            $("tr[data-version-id='" + value + "']").css("background-color", "white");
+            $(`#${value}`).empty().append(htmlEditDelete);
+        };
+
+        // Clear create form
+        function clearCreateForm() {
+            document.getElementById('releases-add__version').reset();
+        }
+
+        // Create type
+        function createType() {
+            var createTypeData = $('#releases-add__version').serialize();
+            jQuery.ajax({
+                type: "post",
+                url: "$requestContext.baseUrl/secure/TestCaseTypesAction!createType.jspa?pid=$selectedProject.id",
+                data: createTypeData,
+                success: function (types) {
+                    $(`#error-type-name`).empty();
+                    $(`#error-type-performance`).empty();
+                    $(`#types-table-body`).empty();
+                    clearCreateForm();
+                    jQuery.each(types, function (index, type) {
+                        formatedString = formatHtml(type.testCaseTypeName);
+                        $(`#types-table-body`).append(`
+                                <tr data-version-id="${type.ID}" class="item-state-ready">
+                                    <td>
+                                        <div style="white-space:pre" id="typeName$type.ID()">${formatedString}</div>
+                                    </td>
+                                    <td>
+                                        <div>
+                                            ${type.performance}
+                                        </div>
+                                    </td>
+
+                                    <td class="dynamic-table__actions">
+                                        <div>
+                                            <a href="#version-actions-${type.ID}" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-${type.ID}"
+                                               aria-expanded="false">
+                                                <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                            </a>
+                                            <div id="version-actions-${type.ID}"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                    <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editType(${type.ID})">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            `);
+                    });
+
+                },
+                error: function (errors) {
+                    var errors = JSON.parse(errors.responseText)
+                    $(`#error-type-name`).empty().append(errors["typeName"]);
+                    $(`#error-type-performance`).empty().append(errors["typePerformance"]);
+                }
+            })
+        }
+        function submitFormByEnter() {
+            if (window.event.keyCode == '13'){
+                event.preventDefault();
+                createType();
+            }
+        }
+    </script>
+
+</head>
+<body class="spinner">
+<header class="aui-page-header aui-page-header-fixed__legacy">
+    <div class="aui-page-header-inner">
+        <div class="aui-page-header-image">
+            <div class="aui-avatar aui-avatar-large">
+                <div class="aui-avatar-inner project-config-icon48-versions"></div>
+            </div>
+        </div>
+        <div class="aui-page-header-main">
+            <h2>$i18n.getText("testcase-type-nav-item.label")</h2>
+        </div>
+    </div>
+</header>
+<div id="release-page" class="releases-page-app releases-page-app__legacy" resolved="" data-ready="true">
+    <div>
+        <div id="submit-container">
+            <form id="releases-add__version" class="aui ajs-dirty-warning-subsequent-submits-allowed">
+                <div class="releases-add__name">
+                    <input id="typeName" name="typeName" class="text medium-long-field" type="text"
+                           placeholder="Name" maxlength="100" onkeydown="submitFormByEnter()">
+                    <div id="error-type-name" class="error-container error">
+                    </div>
+                </div>
+                <div class="releases-add__name">
+                    <input id="typePerformance" class="aui-date-picker text" type="text" name="typePerformance"
+                           placeholder="Peformance (Integer only)" onchange="" maxlength="7">
+                    <div id="error-type-performance" class="error-container error">
+                    </div>
+                </div>
+                <div class="releases-add__confirm">
+                    <button class="aui-button aui-button-primary" type="button" onclick="createType()">Add</button>
+                </div>
+                <input type="hidden" name="atl_token" value="$atl_token"/>
+            </form>
+        </div>
+        #set( $String = '' )##
+        <section class="aui-page-panel-content aui-page-panel-content-no-table">
+            <div id="content-container">
+                <div>
+                    <table id="versions-table" class="aui dynamic-table versions-table">
+                        <tbody class="header">
+                        <tr>
+                            <th class="versions-table__name">Name</th>
+                            <th class="versions-table__name">Performance</th>
+                            <th></th>
+                        </tr>
+                        </tbody>
+                        <tbody id="types-table-body" class="items ui-sortable" style="">
+                            #if ($types.size() > 0)
+                                #foreach( $type in $types )
+                                <tr data-version-id="$type.getID()" class="item-state-ready">
+                                    <td>
+                                        <div style="white-space:pre" id="typeName$type.getID()">$type.getTestCaseTypeName()</div>
+                                    </td>
+                                    <td>
+                                        <div>$type.getPerformance()
+                                        </div>
+                                    </td>
+                                    <td class="dynamic-table__actions">
+
+                                        <div id="$type.getID()">
+                                            <a href="#version-actions-$type.getID()" aria-haspopup="true"
+                                               class="aui-button aui-button-subtle aui-button-compact aui-dropdown2-trigger aui-dropdown2-trigger-arrowless aui-style-default details-button"
+                                               resolved="" aria-controls="version-actions-$type.getID()"
+                                               aria-expanded="false">
+                                                <span class="aui-icon aui-icon-small aui-iconfont-more">Operations</span>
+                                            </a>
+                                            <div id="version-actions-$type.getID()"
+                                                 class="aui-dropdown2 aui-style-default version-actions aui-layer"
+                                                 resolved=""
+                                                 aria-hidden="true">
+                                                <ul class="aui-list-truncate">
+                                                    <li>
+                                                        <a class="version-edit-dialog"
+                                                           href="javascript:void(0)"
+                                                           onclick="editType($type.getID())">Edit</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                #end
+                            #end
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </div>
+</div>
+</body>
+</html>

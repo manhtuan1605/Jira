@@ -1,0 +1,115 @@
+<html>
+<head>
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:ajs")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-date-picker")
+    $webResourceManager.requireResource("com.atlassian.auiplugin:aui-select2")
+    $webResourceManager.requireResourcesForContext("jira-customize")
+    <style>
+        .table-no-data {
+            text-align: center !important;
+            font-size: 20px;
+            font-weight: bold;
+            color: gray;
+        }
+
+        .text-align-right {
+            text-align: right !important;
+        }
+
+        .monitor-item {
+            text-align: right;
+            padding: 0 10px;
+        }
+
+        .field-width-100 {
+            max-width: 100px !important;
+        }
+
+        .heading-monitor {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .body-monitor {
+            overflow: auto;
+            margin: 10px 0;
+            padding: 10px 0;
+        }
+
+        .tabble-summary td, .tabble-summary th {
+            border: 1px solid #ccc !important;
+        }
+
+        .background-yellow {
+            background-color: #ffff00;
+        }
+
+        .background-red {
+            background-color: #ff0000;
+        }
+        .myText{
+            text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+<div>
+
+
+    <div class="body-monitor">
+        <table class="">
+            <thead>
+            <tr>
+                <th >Components</th>
+                <th >Total Test Case</th>
+                <th >OK</th>
+                <th >OK-</th>
+                <th >NG-</th>
+                <th >NG+</th>
+                <th >Today NG</th>
+                <th >Total NG</th>
+                <th >PN-</th>
+                <th >PN+</th>
+                <th >Today PN</th>
+                <th >Total PN</th>
+
+            </tr>
+            </thead>
+            <tbody id="body-perform">
+                #if($reportResultDTOS.size() > 0)
+                    #foreach($element in $reportResultDTOS)
+                    <tr>
+                        <td >$element.component</td>
+                        <td >$element.totalTestCase</td>
+                        <td >$element.okPlus</td>
+                        <td >$element.okMinus</td>
+                        <td >$element.nGMinus</td>
+                        <td >$element.nGPlus</td>
+                        <td >$element.todayNG</td>
+                        <td >$element.totalNG</td>
+                        <td >$element.pNMinus</td>
+                        <td >$element.pNPlus</td>
+                        <td >$element.todayPN</td>
+                        <td >$element.totalPN</td>
+                    <tr>
+                    #end
+                #else
+                <tr>
+                    <td colspan="19" class="table-no-data">No data</td>
+                </tr>
+                #end
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<!-- Start Test Execute Detail-->
+<!-- End Test Execute Detail-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.js"></script>
+
+</body>
+</html>

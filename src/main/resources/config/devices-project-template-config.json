@@ -1,0 +1,109 @@
+{
+  "issue-type-scheme":
+  {
+    "name": "devices.project.template.issuetype.scheme.name",
+    "description": "devices.project.template.issuetype.scheme.description",
+    "issue-types": [
+      {
+        "key": "automotiveDevice",
+        "name": "Automotive Device",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme":"automotiveDeviceDefaultScreenScheme"
+      },
+      {
+        "key": "peripheralDevice",
+        "name": "Peripheral Device",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme": "peripheralDeviceDefaultScreenScheme"
+      },
+      {
+        "key": "externalDevice",
+        "name": "External Device ID",
+        "description": "A new feature of the product, which has yet to be developed.",
+        "icon": "/images/icons/bug.png",
+        "screen-scheme": "externalDeviceDefaultScreenScheme",
+        "workflow": "wf7"
+      }
+    ]
+  },
+  "workflow-scheme": {
+    "name": "devices.project.template.workflow.scheme.name",
+    "description": "devices.project.template.workflow.scheme.description",
+    "default-workflow": "wf7",
+    "workflows": [
+      {
+        "key": "wf7",
+        "name": "devices.project.template.workflow.wf7.name",
+        "workflow-bundle": "/wfb/Device-Project.jwb"
+      }
+    ]
+  },
+  "issue-type-screen-scheme":
+  {
+    "name": "Devices Project Issue Type Screen Scheme",
+    "description": "Devices Project",
+    "default-screen-scheme": "automotiveDeviceDefaultScreenScheme",
+    "screen-schemes": [
+      {
+        "key": "automotiveDeviceDefaultScreenScheme",
+        "name": "Devices Management Screen Scheme",
+        "default-screen": "automotiveDeviceDefaultScreen"
+      },
+      {
+        "key": "peripheralDeviceDefaultScreenScheme",
+        "name": "Screen Device Management Screen Scheme",
+        "default-screen": "peripheralDeviceDefaultScreen"
+      },
+      {
+        "key": "externalDeviceDefaultScreenScheme",
+        "name": "External Device Management Screen Scheme",
+        "default-screen": "externalDeviceDefaultScreen",
+        "create-screen": "externalDeviceCreateScreen"
+      }
+    ],
+    "screens": [
+      {
+        "key": "automotiveDeviceDefaultScreen",
+        "name": "Automotive Device Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields":[]
+          }
+        ]
+      },
+      {
+        "key": "peripheralDeviceDefaultScreen",
+        "name": "Peripheral Device Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields":[]
+          }
+        ]
+      },
+      {
+        "key": "externalDeviceDefaultScreen",
+        "name": "External Device Default Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields":[]
+          }
+        ]
+      },
+      {
+        "key": "externalDeviceCreateScreen",
+        "name": "External Device Create Screen",
+        "tabs": [
+          {
+            "name": "Field Tab",
+            "fields":[]
+          }
+        ]
+      }
+    ]
+  }
+}

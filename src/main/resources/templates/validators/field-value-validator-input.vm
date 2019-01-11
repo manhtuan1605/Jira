@@ -1,0 +1,16 @@
+<tr>
+    <td class="fieldLabelArea">
+        Required Field:
+    </td>
+    <td nowrap>
+        <select name="selectedCustomField" id="selectedCustomField">
+            #foreach($customField in $customFields)
+                <option name="$customField.getId()" id="$customField.getId" value="$customField.getId()"
+                    #if($customField.getId() == $selectedCustomField)
+                        selected
+                    #end
+                >$customField.getName()</option>
+            #end
+        </select>
+    </td>
+</tr>

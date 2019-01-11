@@ -1,0 +1,224 @@
+$webResourceManager.requireResource("atlassian.plugin.key:jira-customize-resources")
+$webResourceManager.requireResourcesForContext("com.cmcglobal.plugins.jira.tabpanels.TestCase.jira-customize-resources")
+<html>
+<head>
+    <title>$i18n.getText("test-result.name")</title>
+    <meta name="decorator" content="atl.admin">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+
+<div id="component" class="componentDiv">
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.lastestResut")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getLastestResult())
+                    #else
+                $resultTest.getLastestResult()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.time")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getExecuteCount())
+                    #else
+                $resultTest.getExecuteCount()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.huIdHuIndex")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getHuIdHuIndex())
+                    #else
+                $resultTest.getHuIdHuIndex()
+            #end
+
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.huId")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getHuId())
+                    #else
+                $resultTest.getHuId()
+            #end
+
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.huIdIndex")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getHuIndex())
+                    #else
+                $resultTest.getHuIndex()
+            #end
+
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.huMarket")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getHuMarket())
+                    #else
+                $resultTest.getHuMarket()
+            #end
+
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.vehicleParameter")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getVehicleParameter())
+                    #else
+                $resultTest.getVehicleParameter()
+            #end
+
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.ampType")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getAmpType())
+                    #else
+                $resultTest.getAmpType()
+            #end
+
+        </div>
+
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.siIndex")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getSiIndex())
+                    #else
+                $resultTest.getSiIndex()
+            #end
+        </div>
+    </div>
+
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.extenalTestDeviceId")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getExtenalTestDeviceId())
+                    #else
+                $resultTest.getExtenalTestDeviceId()
+            #end
+
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.testDuration")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getTestDuration())
+                    #else
+                $resultTest.getTestDuration()
+            #end
+
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.resultComment")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getResultComment())
+                    #else
+                $resultTest.getResultComment()
+            #end
+        </div>
+    </div>
+</div>
+
+#*phan nay se hien thi khi pending*#
+    #set($ok = "OK")
+    #if($resultTest.getLastestResult() != $ok)
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.lastReccentTest")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getLastReccentTest())
+                    #else
+                $resultTest.getLastReccentTest()
+            #end
+
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.timeForQaSubmission")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getTimeForQASubmission())
+                    #else
+                $resultTest.getTimeForQASubmission()
+            #end
+
+        </div>
+
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.timeForDefectSubmission")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getTimeForDefectSubmission())
+                    #else
+                $resultTest.getTimeForDefectSubmission()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.jiraCore")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getJiraCore())
+                    #else
+                $resultTest.getJiraCore()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.jiraStatus")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getJiraStatus())
+                    #else
+                $resultTest.getJiraStatus()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.extenalTicketId")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getExtenalTicketId())
+                    #else
+                $resultTest.getExtenalTicketId()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.blockingTicketId")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getBlockingTicketId())
+                    #else
+                $resultTest.getBlockingTicketId()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.blockingTicketType")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getBlockingTicketType())
+                    #else
+                $resultTest.getBlockingTicketType()
+            #end
+        </div>
+    </div>
+    <div class="row divGroup">
+        <div class="col-md-4 divName">$i18n.getText("test-result.blockingTicketStatus")</div>
+        <div class="col-md-8 divValue">
+            #if (!$resultTest.getBlockingTicketStatus())
+                    #else
+                $resultTest.getBlockingTicketStatus()
+            #end
+        </div>
+    </div>
+    #end
+
+</body>
+</html>

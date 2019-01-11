@@ -1,0 +1,14 @@
+<html>
+<head>
+</head>
+<body>
+    <div class="aui-message error" style="width: 50%;margin-top: 20px">
+        <p class="title">
+            <span class="aui-icon icon-error"></span>
+            <strong>$error</strong>
+        </p>
+        <p>$message</p>
+    </div>
+</body>
+</html>
+
